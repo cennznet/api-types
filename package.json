@@ -1,0 +1,31 @@
+{
+    "name": "@cennznet/api-types",
+    "version": "1.0.0-rc2",
+    "description": "Type definitions for CENNZnet node",
+    "author": "Centrality Developers <developers@centrality.ai>",
+    "keywords": [
+        "CENNZNet"
+    ],
+    "homepage": "https://github.com/cennznet/api-types",
+    "license": "Apache-2.0",
+    "main": "index.js",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "git+ssh://git@github.com/cennznet/api-types.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: run tests from root\" && exit 1"
+    },
+    "dependencies": {
+        "typescript": "^3.7.5",
+        "@polkadot/types": "^1.1.1",
+        "@polkadot/util": "^2.3.1",
+        "@polkadot/keyring": "^2.3.1",
+        "memoizee": "^0.4.14"
+    },
+    "devDependencies": {
+        "@polkadot/api": "^1.1.1",
+        "@polkadot/rpc-provider": "^1.1.1"
+    }
+}
