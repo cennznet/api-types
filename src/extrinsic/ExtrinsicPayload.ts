@@ -101,7 +101,7 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
    */
   public get tip (): Compact<Balance> {
     // NOTE from v2+
-    return (this.raw as ExtrinsicPayloadV4).tip || createType(this.registry, 'Compact<Balance>');
+    return (this.raw as ExtrinsicPayloadV4).transactionPayment.tip
   }
 
   /**

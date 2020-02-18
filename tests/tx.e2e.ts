@@ -17,6 +17,9 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import Types from '@cennznet/api-types/injects';
+import ExtrinsicV4 from '@cennznet/api-types/extrinsic/v2/Extrinsic';
+import ExtrinsicPayloadV4 from '@cennznet/api-types/extrinsic/v2/ExtrinsicPayload';
+import ExtrinsicSignatureV4 from '@cennznet/api-types/extrinsic/v2/ExtrinsicSignature';
 import {ApiPromise, Keyring, WsProvider} from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types';
 import {cryptoWaitReady} from '@polkadot/util-crypto';
@@ -36,7 +39,9 @@ describe('e2e transactions', () => {
     api = await ApiPromise.create({
       provider: new WsProvider('ws://localhost:9944'),
       types: {
-        ...Types
+        ...Types,
+        ExtrinsicPayloadV4: ExtrinsicPayloadV4,
+        ExtrinsicSignatureV4: ExtrinsicSignatureV4
       },
       registry
     });

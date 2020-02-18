@@ -14,6 +14,41 @@ import Struct from '@polkadot/types/codec/Struct';
 import Bytes from '@polkadot/types/primitive/Bytes';
 import u32 from '@polkadot/types/primitive/U32';
 import { sign } from '@polkadot/types/primitive/Extrinsic/util';
+import {CennznetInterfaceTypes} from '../types';
+
+// The base of an extrinsic payload
+export const BasePayloadV2: Record<string, CennznetInterfaceTypes> = {
+  method: 'Bytes',
+  doughnut: 'Option<Doughnut>',
+  era: 'ExtrinsicEra',
+  nonce: 'Compact<Index>',
+  transactionPayment: 'ChargeTransactionPayment',
+};
+
+// These fields are signed here as part of the extrinsic signature but are NOT encoded in
+// the final extrinsic payload itself.
+// The CENNZnet node will populate these fields from on-chain data and check the signature compares
+// hence 'implicit'
+export const PayloadImplicitAddonsV2: Record<string, CennznetInterfaceTypes> = {
+  // prml_doughnut::Option<PlugDoughnut<Doughnut, Runtime>>
+  // system::CheckVersion<Runtime>
+  specVersion: 'u32',
+  // system::CheckGenesis<Runtime>
+  genesisHash: 'Hash',
+  // system::CheckEra<Runtime>
+  blockHash: 'Hash',
+  // system::CheckNonce<Runtime>
+  // system::CheckWeight<Runtime>
+  // transaction_payment::ChargeTransactionPayment<Runtime>,
+  // contracts::CheckBlockGasLimit<Runtime>,
+};
+
+// The full definition for the extrinsic payload.
+// It will be encoded (+ hashed if len > 256) and then signed to make the extrinsic signature
+export const FullPayloadV2: Record<string, CennznetInterfaceTypes> = {
+  ...BasePayloadV2,
+  ...PayloadImplicitAddonsV2,
+};
 
 /**
  * @name GenericExtrinsicPayloadV4
@@ -25,8 +60,10 @@ export default class ExtrinsicPayloadV4 extends Struct {
   constructor (registry: Registry, value?: ExtrinsicPayloadValue | Uint8Array | string) {
     super(registry, {
       method: 'Bytes',
-      ...registry.getSignedExtensionTypes(),
-      ...registry.getSignedExtensionExtra()
+      // TODO: Load this dynamically like so:
+      // ...registry.getSignedExtensionTypes(),
+      // ...registry.getSignedExtensionExtra()
+      ...FullPayloadV2
     }, value);
   }
 

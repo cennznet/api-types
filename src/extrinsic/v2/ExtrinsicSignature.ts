@@ -27,7 +27,13 @@ export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSi
     super(registry, {
       signer: 'Address',
       signature: 'MultiSignature',
-      ...registry.getSignedExtensionTypes()
+      // TODO: Load this dynamically like so:
+      // ...registry.getSignedExtensionTypes(),
+      // ...registry.getSignedExtensionExtra()
+      doughnut: 'Option<Doughnut>',
+      era: 'ExtrinsicEra',
+      nonce: 'Compact<Index>',
+      transactionPayment: 'ChargeTransactionPayment',
     }, ExtrinsicSignatureV4.decodeExtrinsicSignature(value, isSigned));
   }
 
@@ -164,7 +170,6 @@ export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSi
   public sign (method: Call, account: IKeyringPair, options: SignatureOptions): IExtrinsicSignature {
     const signer = createType(this.registry, 'Address', account.publicKey);
     const payload = this.createPayload(method, options);
-    console.log("######Payload$$$$$", payload);
     const signature = createType(this.registry, 'MultiSignature', payload.sign(account));
 
     return this.injectSignature(signer, signature, payload);

@@ -11,18 +11,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-import {TypeRegistry, u64} from '@polkadot/types';
-import {MultiSignature} from '@polkadot/types/interfaces/runtime/types';
 import Doughnut from './Doughnut';
 import * as extrinsicTypes from './extrinsic';
 import * as runtimeTypes from './runtime';
 
 export default {
   ...runtimeTypes,
-  ...extrinsicTypes,
+  //...extrinsicTypes,
   AssetOf: 'u128',
   'ed25519::Signature': 'H512',
   RewardBalance: 'Balance',
   Doughnut: Doughnut,
 };
-

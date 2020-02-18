@@ -11,11 +11,10 @@ import { assert, isHex, isU8a, u8aConcat, u8aToHex, u8aToU8a } from '@polkadot/u
 import { createType, ClassOf } from '@polkadot/types/codec/create';
 import Base from '@polkadot/types/codec/Base';
 import Compact from '@polkadot/types/codec/Compact';
-import { ExtrinsicValueV4 } from '@polkadot/types/primitive/Extrinsic/v4/Extrinsic';
 import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
 import { BIT_SIGNED, BIT_UNSIGNED, DEFAULT_VERSION, UNMASK_VERSION } from './constants';
 
-import ExtrinsicV4 from './v2/Extrinsic';
+import ExtrinsicV4,{ ExtrinsicValueV4 } from './v2/Extrinsic';
 import { ExtrinsicPayloadValue } from './types';
 
 interface CreateOptions {
@@ -23,8 +22,7 @@ interface CreateOptions {
 }
 
 // NOTE The following 2 types, as well as the VERSION structure and the latest export
-// is to be changed with the addition of a new extrinsic version
-
+// should be changed with the addition of new extrinsic versions
 type ExtrinsicVx = ExtrinsicV4;
 type ExtrinsicValue = ExtrinsicValueV4;
 
@@ -215,7 +213,7 @@ export default class Extrinsic extends Base<ExtrinsicVx> implements IExtrinsic {
    * @description Forwards compat
    */
   public get tip (): Compact<Balance> {
-    return (this.raw as ExtrinsicVx).signature.tip;
+    return (this.raw as ExtrinsicVx).signature.transactionPayment.tip;
   }
 
   /**
@@ -287,8 +285,8 @@ export default class Extrinsic extends Base<ExtrinsicVx> implements IExtrinsic {
   public toU8a (isBare?: boolean): Uint8Array {
     // we do not apply bare to the internal values, rather this only determines out length addition,
     // where we strip all lengths this creates an un-decodable extrinsic
-    const encoded = u8aConcat(new Uint8Array([this.version]), this.raw.toU8a());
-
+    const encoded = u8aConcat(new Uint8Array([this.version]), (this.raw as ExtrinsicVx).toU8a());
+    console.log("Extrinsic", encoded);
     return isBare
       ? encoded
       : Compact.addLengthPrefix(encoded);

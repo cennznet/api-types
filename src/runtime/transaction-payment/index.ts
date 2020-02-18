@@ -16,9 +16,7 @@ import {Enum, Struct} from '@polkadot/types';
 import Compact from '@polkadot/types/codec/Compact';
 import Option from '@polkadot/types/codec/Option';
 import {AssetId, Balance} from '@polkadot/types/interfaces/runtime';
-// import { Registry } from '@polkadot/types/types';
 import {Registry} from '@polkadot/types/types';
-// import {AnyJson, AnyJsonObject} from '@polkadot/types/types';
 
 /* [[FeeExchangeV1]] when included in a transaction it indicates network fees should be
  * paid in `assetId` by paying up to `maxPayment` after the exchange rate is calculated.
@@ -41,7 +39,7 @@ export class FeeExchangeV1 extends Struct {
 
 export class FeeExchange extends Enum {
   constructor(registry: Registry, value: any) {
-    super(registry, {FeeExchangeV1}, value);
+    super(registry, {FeeExchangeV1: FeeExchangeV1}, value);
   }
 }
 

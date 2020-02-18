@@ -12,35 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Compact from '@polkadot/types/codec/Compact';
 import Raw from '@polkadot/types/codec/Raw';
-import Bytes from '@polkadot/types/primitive/Bytes';
-import {AnyU8a, Codec, Registry} from '@polkadot/types/types';
 
 /**
  * An encoded, signed v0 Doughnut certificate
  **/
-export default class Doughnut extends Raw {
-  // implements Codec {
-  get encodedLength(): number {
-    return this.toU8a().length;
-  }
-
-  constructor(registry: Registry, value?: AnyU8a) {
-    // This function is used as both a constructor and a decoder
-    // Doughnut has its own codec but it must be length prefixed to support the SCALE codec used by the extrinsic
-
-    // Failure to decode indicates a call as a constructor
-    const decoded = new Bytes(registry, value);
-    if (decoded.length > 0) {
-      super(registry, decoded);
-    } else {
-      super(registry, value);
-    }
-  }
-
-  toU8a(isBare?: boolean): Uint8Array {
-    // Encode the doughnut with length prefix to support SCALE codec
-    return isBare ? (this as Raw) : Compact.addLengthPrefix(this.toU8a());
-  }
-}
+export default class Doughnut extends Raw {}
