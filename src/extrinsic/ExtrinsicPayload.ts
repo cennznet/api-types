@@ -1,122 +1,118 @@
-// Copyright 2017-2019 @polkadot/types authors & contributors
+// Copyright 2017-2020 @polkadot/types authors & contributors
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-// tslint:disable member-ordering no-magic-numbers
+import { Balance, ExtrinsicPayloadV1, ExtrinsicPayloadV2, ExtrinsicPayloadV3, ExtrinsicPayloadV4, Hash, Index } from '@polkadot/types/interfaces/runtime';
+import { BareOpts, ExtrinsicPayloadValue, IKeyringPair, InterfaceTypes, Registry } from '@polkadot/types/types';
 
-import {Compact, Raw, u32} from '@polkadot/types';
+import { u8aToHex } from '@polkadot/util';
+
+import { createType } from '@polkadot/types/codec/create';
 import Base from '@polkadot/types/codec/Base';
-import {Balance, Hash} from '@polkadot/types/interfaces/runtime';
-import {IExtrinsicEra, IKeyringPair, Registry} from '@polkadot/types/types';
-
-import {u8aToHex} from '@polkadot/util';
-
-import {ChargeTransactionPayment, Index} from '../runtime';
-import {DEFAULT_VERSION} from './constants';
-import {ExtrinsicPayloadValue} from './types';
-import ExtrinsicPayloadV2, {ExtrinsicPayloadValueV2} from './v2/ExtrinsicPayload';
+import Compact from '@polkadot/types/codec/Compact';
+import Raw from '@polkadot/types/codec/Raw';
+import u32 from '@polkadot/types/primitive/U32';
+import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
+import { DEFAULT_VERSION } from './constants';
 
 interface ExtrinsicPayloadOptions {
   version?: number;
 }
 
 // all our known types that can be returned
-type ExtrinsicPayloadVx = ExtrinsicPayloadV2;
+type ExtrinsicPayloadVx = ExtrinsicPayloadV1 | ExtrinsicPayloadV2 | ExtrinsicPayloadV3 | ExtrinsicPayloadV4;
+
+const VERSIONS: InterfaceTypes[] = [
+  'ExtrinsicPayloadUnknown', // v0 is unknown
+  'ExtrinsicPayloadV1',
+  'ExtrinsicPayloadV2',
+  'ExtrinsicPayloadV3',
+  'ExtrinsicPayloadV4'
+];
 
 /**
- * @name ExtrinsicPayload
+ * @name GenericExtrinsicPayload
  * @description
  * A signing payload for an [[Extrinsic]]. For the final encoding, it is variable length based
  * on the contents included
  */
 export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
-  constructor(
-    registry: Registry,
-    value: Partial<ExtrinsicPayloadValue> | Uint8Array | string | undefined,
-    {version}: ExtrinsicPayloadOptions = {}
-  ) {
+  constructor (registry: Registry, value: Partial<ExtrinsicPayloadValue> | Uint8Array | string | undefined, { version }: ExtrinsicPayloadOptions = {}) {
     super(registry, ExtrinsicPayload.decodeExtrinsicPayload(registry, value as ExtrinsicPayloadValue, version));
   }
 
-  static decodeExtrinsicPayload(
-    registry: Registry,
-    value: ExtrinsicPayload | ExtrinsicPayloadValue | ExtrinsicPayloadValueV2 | Uint8Array | string | undefined,
-    version: number = DEFAULT_VERSION
-  ): ExtrinsicPayloadVx {
+  /** @internal */
+  public static decodeExtrinsicPayload (registry: Registry, value: ExtrinsicPayload | ExtrinsicPayloadValue | Uint8Array | string | undefined, version: number = DEFAULT_VERSION): ExtrinsicPayloadVx {
     if (value instanceof ExtrinsicPayload) {
       return value.raw;
     }
 
-    return new ExtrinsicPayloadV2(registry, value as ExtrinsicPayloadValueV2);
+    return createType(registry, VERSIONS[version] || VERSIONS[0], value, { version }) as ExtrinsicPayloadVx;
   }
 
   /**
    * @description The block [[Hash]] the signature applies to (mortal/immortal)
    */
-  get blockHash(): Hash {
+  public get blockHash (): Hash {
     return this.raw.blockHash;
   }
 
   /**
    * @description The [[ExtrinsicEra]]
    */
-  get era(): IExtrinsicEra {
+  public get era (): ExtrinsicEra {
     return this.raw.era;
   }
 
   /**
    * @description The genesis block [[Hash]] the signature applies to
    */
-  get genesisHash(): Hash {
-    return (this.raw as ExtrinsicPayloadV2).genesisHash;
+  public get genesisHash (): Hash {
+    // NOTE only v3+
+    return (this.raw as ExtrinsicPayloadV3).genesisHash || createType(this.registry, 'Hash');
   }
 
   /**
-   * @description The [[U8a]] contained in the payload
+   * @description The [[Raw]] contained in the payload
    */
-  get method(): Raw {
+  public get method (): Raw {
     return this.raw.method;
   }
 
   /**
    * @description The [[Index]]
    */
-  get nonce(): Compact<Index> {
+  public get nonce (): Compact<Index> {
     return this.raw.nonce;
   }
 
   /**
    * @description The specVersion as a [[u32]] for this payload
    */
-  get specVersion(): u32 {
-    return (this.raw as ExtrinsicPayloadV2).specVersion;
+  public get specVersion (): u32 {
+    // NOTE only v3+
+    return (this.raw as ExtrinsicPayloadV3).specVersion || createType(this.registry, 'u32');
   }
 
   /**
-   * @description The tip [[Balance]] given to the transaction
+   * @description The [[Balance]]
    */
-  get tip(): Compact<Balance> {
-    return (this.raw as ExtrinsicPayloadV2).tip;
-  }
-
-  /**
-   * @description The fee payment metadata (includes. tip)
-   */
-  get transactionPayment(): ChargeTransactionPayment {
-    return (this.raw as ExtrinsicPayloadV2).transactionPayment;
+  public get tip (): Compact<Balance> {
+    // NOTE from v2+
+    return (this.raw as ExtrinsicPayloadV2).tip || createType(this.registry, 'Compact<Balance>');
   }
 
   /**
    * @description Compares the value of the input to see if there is a match
    */
-  eq(other?: any): boolean {
+  public eq (other?: any): boolean {
     return this.raw.eq(other);
   }
 
   /**
    * @description Sign the payload with the keypair
    */
-  sign(signerPair: IKeyringPair): {signature: string} {
+  public sign (signerPair: IKeyringPair): { signature: string } {
     const signature = this.raw.sign(signerPair);
 
     // This is extensible, so we could quite readily extend to send back extra
@@ -124,21 +120,29 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
     // For the case here we sign via the extrinsic, we ignore the return, so generally
     // this is applicable for external signing
     return {
-      signature: u8aToHex(signature),
+      signature: u8aToHex(signature)
     };
   }
 
   /**
    * @description Converts the Object to JSON, typically used for RPC transfers
    */
-  toJSON(): any {
+  public toJSON (): any {
     return this.toHex();
   }
 
   /**
    * @description Returns the string representation of the value
    */
-  toString(): string {
+  public toString (): string {
     return this.toHex();
+  }
+
+  /**
+   * @description Returns a serialized u8a form
+   */
+  public toU8a (isBare?: BareOpts): Uint8Array {
+    // call our parent, with only the method stripped
+    return super.toU8a(isBare ? { method: true } : false);
   }
 }
