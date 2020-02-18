@@ -1,5 +1,4 @@
 import { u64 } from '@polkadot/types';
-import Option from '@polkadot/types/codec/Option';
 import Doughnut from './Doughnut';
 import * as extrinsicTypes from './extrinsic';
 import * as runtimeTypes from './runtime';
@@ -8,7 +7,6 @@ declare const _default: {
     'ed25519::Signature': string;
     RewardBalance: string;
     Doughnut: typeof Doughnut;
-    Option: typeof Option;
     Extrinsic: typeof extrinsicTypes.Extrinsic;
     ExtrinsicPayload: typeof extrinsicTypes.ExtrinsicPayload;
     SignerPayload: typeof extrinsicTypes.SignerPayload;

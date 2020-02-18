@@ -1,10 +1,12 @@
 import { FunctionMetadataLatest } from '@polkadot/types/interfaces/metadata/types';
-import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicUnknown, ExtrinsicV4, Index, Sr25519Signature } from '@polkadot/types/interfaces/runtime';
-import { AnyU8a, ArgsDef, Codec, ExtrinsicPayloadValue, IExtrinsic, IKeyringPair, Registry, SignatureOptions } from '@polkadot/types/types';
+import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, Index, Sr25519Signature } from '@polkadot/types/interfaces/runtime';
+import { AnyU8a, ArgsDef, Codec, IExtrinsic, IKeyringPair, Registry, SignatureOptions } from '@polkadot/types/types';
 import Base from '@polkadot/types/codec/Base';
 import Compact from '@polkadot/types/codec/Compact';
 import { ExtrinsicValueV4 } from '@polkadot/types/primitive/Extrinsic/v4/Extrinsic';
 import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
+import ExtrinsicV4 from './v2/Extrinsic';
+import { ExtrinsicPayloadValue } from './types';
 interface CreateOptions {
     version?: number;
 }
@@ -22,12 +24,12 @@ declare type ExtrinsicValue = ExtrinsicValueV4;
  * - signed, to create a transaction
  * - left as is, to create an inherent
  */
-export default class Extrinsic extends Base<ExtrinsicVx | ExtrinsicUnknown> implements IExtrinsic {
+export default class Extrinsic extends Base<ExtrinsicVx> implements IExtrinsic {
     constructor(registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, { version }?: CreateOptions);
     /** @internal */
     private static newFromValue;
     /** @internal */
-    static decodeExtrinsic(registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, version?: number): ExtrinsicVx | ExtrinsicUnknown;
+    static decodeExtrinsic(registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, version?: number): ExtrinsicVx;
     /** @internal */
     private static decodeU8aLike;
     /** @internal */

@@ -4,11 +4,10 @@
 
 import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
 import { IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
-import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions } from '../types';
+import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions, SignatureOptions } from '../types';
 
 import { u8aConcat } from '@polkadot/util';
 
-import { SignatureOptions } from '../types';
 import { ChargeTransactionPayment, Index } from '../../runtime';
 import Doughnut from '../../Doughnut';
 import { createType } from '@polkadot/types/codec/create';
@@ -165,6 +164,7 @@ export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSi
   public sign (method: Call, account: IKeyringPair, options: SignatureOptions): IExtrinsicSignature {
     const signer = createType(this.registry, 'Address', account.publicKey);
     const payload = this.createPayload(method, options);
+    console.log("######Payload$$$$$", payload);
     const signature = createType(this.registry, 'MultiSignature', payload.sign(account));
 
     return this.injectSignature(signer, signature, payload);

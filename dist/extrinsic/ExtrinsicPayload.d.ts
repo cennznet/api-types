@@ -1,14 +1,19 @@
-import { Balance, ExtrinsicPayloadV1, ExtrinsicPayloadV2, ExtrinsicPayloadV3, ExtrinsicPayloadV4, Hash, Index } from '@polkadot/types/interfaces/runtime';
-import { BareOpts, ExtrinsicPayloadValue, IKeyringPair, Registry } from '@polkadot/types/types';
+import { Balance, Hash } from '@polkadot/types/interfaces/runtime';
+import { BareOpts, IKeyringPair, Registry } from '@polkadot/types/types';
 import Base from '@polkadot/types/codec/Base';
 import Compact from '@polkadot/types/codec/Compact';
+import Option from '@polkadot/types/codec/Option';
 import Raw from '@polkadot/types/codec/Raw';
 import u32 from '@polkadot/types/primitive/U32';
 import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
+import ExtrinsicPayloadV4 from './v2/ExtrinsicPayload';
+import { ExtrinsicPayloadValue } from './types';
+import Doughnut from '../Doughnut';
+import { ChargeTransactionPayment, Index } from '../runtime';
 interface ExtrinsicPayloadOptions {
     version?: number;
 }
-declare type ExtrinsicPayloadVx = ExtrinsicPayloadV1 | ExtrinsicPayloadV2 | ExtrinsicPayloadV3 | ExtrinsicPayloadV4;
+declare type ExtrinsicPayloadVx = ExtrinsicPayloadV4;
 /**
  * @name GenericExtrinsicPayload
  * @description
@@ -47,6 +52,11 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
      * @description The [[Balance]]
      */
     get tip(): Compact<Balance>;
+    /**
+     * @description The fee payment metadata (includes. tip)
+     */
+    get transactionPayment(): ChargeTransactionPayment;
+    get doughnut(): Option<Doughnut>;
     /**
      * @description Compares the value of the input to see if there is a match
      */

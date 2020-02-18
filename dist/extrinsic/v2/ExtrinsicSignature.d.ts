@@ -1,20 +1,21 @@
-import { Compact, Struct } from '@polkadot/types';
-import Option from '@polkadot/types/codec/Option';
-import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces/runtime';
-import { ExtrinsicSignatureOptions } from '@polkadot/types/primitive/Extrinsic/types';
+import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
 import { IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
-import Doughnut from '../../Doughnut';
+import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions, SignatureOptions } from '../types';
 import { ChargeTransactionPayment, Index } from '../../runtime';
-import { ExtrinsicV2SignatureOptions } from '../types';
-import { ExtrinsicPayloadValueV2 } from './ExtrinsicPayload';
+import Doughnut from '../../Doughnut';
+import Compact from '@polkadot/types/codec/Compact';
+import Option from '@polkadot/types/codec/Option';
+import Struct from '@polkadot/types/codec/Struct';
+import ExtrinsicPayloadV4 from './ExtrinsicPayload';
 /**
- * @name ExtrinsicSignature
+ * @name GenericExtrinsicSignatureV4
  * @description
  * A container for the [[Signature]] associated with a specific [[Extrinsic]]
  */
-export default class ExtrinsicSignatureV2 extends Struct implements IExtrinsicSignature {
-    constructor(registry: Registry, value?: ExtrinsicSignatureV2 | Uint8Array | undefined, { isSigned }?: ExtrinsicSignatureOptions);
-    static decodeExtrinsicSignature(value: ExtrinsicSignatureV2 | Uint8Array | undefined, isSigned?: boolean): ExtrinsicSignatureV2 | Uint8Array;
+export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSignature {
+    constructor(registry: Registry, value: ExtrinsicSignatureV4 | Uint8Array | undefined, { isSigned }?: ExtrinsicSignatureOptions);
+    /** @internal */
+    static decodeExtrinsicSignature(value: ExtrinsicSignatureV4 | Uint8Array | undefined, isSigned?: boolean): ExtrinsicSignatureV4 | Uint8Array;
     /**
      * @description The length of the value when encoded as a Uint8Array
      */
@@ -32,11 +33,7 @@ export default class ExtrinsicSignatureV2 extends Struct implements IExtrinsicSi
      */
     get nonce(): Compact<Index>;
     /**
-     * @description The [[Doughnut]]
-     */
-    get doughnut(): Option<Doughnut>;
-    /**
-     * @description The actuall [[Signature]] hash
+     * @description The actual [[EcdsaSignature]], [[Ed25519Signature]] or [[Sr25519Signature]]
      */
     get signature(): EcdsaSignature | Ed25519Signature | Sr25519Signature;
     /**
@@ -48,26 +45,34 @@ export default class ExtrinsicSignatureV2 extends Struct implements IExtrinsicSi
      */
     get signer(): Address;
     /**
-     * @description tip (here for compatibility with [[IExtrinsic]] definition)
+     * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
      */
     get tip(): Compact<Balance>;
     /**
      * @description The transaction fee metadata e.g tip, fee exchange
      */
     get transactionPayment(): ChargeTransactionPayment;
-    private injectSignature;
+    /**
+     * @description The [[Doughnut]]
+     */
+    get doughnut(): Option<Doughnut>;
+    protected injectSignature(signer: Address, signature: MultiSignature, { era, nonce, doughnut, transactionPayment }: ExtrinsicPayloadV4): IExtrinsicSignature;
     /**
      * @description Adds a raw signature
      */
-    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValueV2 | Uint8Array | string): IExtrinsicSignature;
+    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValue | Uint8Array | string): IExtrinsicSignature;
     /**
-     * @description Generate a payload and pplies the signature from a keypair
+     * @description Creates a payload from the supplied options
      */
-    sign(method: Call, account: IKeyringPair, { blockHash, era, genesisHash, nonce, doughnut, feeExchange, runtimeVersion: { specVersion }, tip, transactionPayment, }: ExtrinsicV2SignatureOptions): IExtrinsicSignature;
+    createPayload(method: Call, { blockHash, era, genesisHash, nonce, runtimeVersion: { specVersion }, tip, doughnut, transactionPayment }: SignatureOptions): ExtrinsicPayloadV4;
+    /**
+     * @description Generate a payload and applies the signature from a keypair
+     */
+    sign(method: Call, account: IKeyringPair, options: SignatureOptions): IExtrinsicSignature;
     /**
      * @description Generate a payload and applies a fake signature
      */
-    signFake(method: Call, address: Address | Uint8Array | string, { blockHash, era, genesisHash, nonce, doughnut, feeExchange, runtimeVersion: { specVersion }, tip, transactionPayment, }: ExtrinsicV2SignatureOptions): IExtrinsicSignature;
+    signFake(method: Call, address: Address | Uint8Array | string, options: SignatureOptions): IExtrinsicSignature;
     /**
      * @description Encodes the value as a Uint8Array as per the SCALE specifications
      * @param isBare true when the value has none of the type-specific prefixes (internal)

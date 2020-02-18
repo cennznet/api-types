@@ -9,7 +9,6 @@ const Base_1 = require("@polkadot/types/codec/Base");
 const Compact_1 = require("@polkadot/types/codec/Compact");
 const constants_1 = require("./constants");
 const VERSIONS = [
-    'ExtrinsicUnknown',
     'ExtrinsicV4'
 ];
 /**

@@ -3,8 +3,8 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { FunctionMetadataLatest } from '@polkadot/types/interfaces/metadata/types';
-import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicUnknown, ExtrinsicV1, ExtrinsicV2, ExtrinsicV3, ExtrinsicV4, Index, Sr25519Signature } from '@polkadot/types/interfaces/runtime';
-import { AnyU8a, ArgsDef, Codec, ExtrinsicPayloadValue, IExtrinsic, IKeyringPair, InterfaceTypes, Registry, SignatureOptions } from '@polkadot/types/types';
+import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, Index, Sr25519Signature } from '@polkadot/types/interfaces/runtime';
+import { AnyU8a, ArgsDef, Codec, IExtrinsic, IKeyringPair, InterfaceTypes, Registry, SignatureOptions } from '@polkadot/types/types';
 
 import { assert, isHex, isU8a, u8aConcat, u8aToHex, u8aToU8a } from '@polkadot/util';
 
@@ -14,6 +14,9 @@ import Compact from '@polkadot/types/codec/Compact';
 import { ExtrinsicValueV4 } from '@polkadot/types/primitive/Extrinsic/v4/Extrinsic';
 import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
 import { BIT_SIGNED, BIT_UNSIGNED, DEFAULT_VERSION, UNMASK_VERSION } from './constants';
+
+import ExtrinsicV4 from './v2/Extrinsic';
+import { ExtrinsicPayloadValue } from './types';
 
 interface CreateOptions {
   version?: number;
@@ -26,7 +29,6 @@ type ExtrinsicVx = ExtrinsicV4;
 type ExtrinsicValue = ExtrinsicValueV4;
 
 const VERSIONS: InterfaceTypes[] = [
-  'ExtrinsicUnknown', // v0 is unknown
   'ExtrinsicV4'
 ];
 
@@ -42,13 +44,13 @@ const VERSIONS: InterfaceTypes[] = [
  * - signed, to create a transaction
  * - left as is, to create an inherent
  */
-export default class Extrinsic extends Base<ExtrinsicVx | ExtrinsicUnknown> implements IExtrinsic {
+export default class Extrinsic extends Base<ExtrinsicVx> implements IExtrinsic {
   constructor (registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, { version }: CreateOptions = {}) {
     super(registry, Extrinsic.decodeExtrinsic(registry, value, version));
   }
 
   /** @internal */
-  private static newFromValue (registry: Registry, value: any, version: number): ExtrinsicVx | ExtrinsicUnknown {
+  private static newFromValue (registry: Registry, value: any, version: number): ExtrinsicVx {
     if (value instanceof Extrinsic) {
       return value.raw;
     }
@@ -62,7 +64,7 @@ export default class Extrinsic extends Base<ExtrinsicVx | ExtrinsicUnknown> impl
   }
 
   /** @internal */
-  public static decodeExtrinsic (registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, version: number = DEFAULT_VERSION): ExtrinsicVx | ExtrinsicUnknown {
+  public static decodeExtrinsic (registry: Registry, value: Extrinsic | ExtrinsicValue | AnyU8a | Call | undefined, version: number = DEFAULT_VERSION): ExtrinsicVx {
     if (Array.isArray(value) || isHex(value)) {
       return Extrinsic.decodeU8aLike(registry, value, version);
     } else if (isU8a(value)) {
@@ -75,7 +77,7 @@ export default class Extrinsic extends Base<ExtrinsicVx | ExtrinsicUnknown> impl
   }
 
   /** @internal */
-  private static decodeU8aLike (registry: Registry, value: string | number[], version: number): ExtrinsicVx | ExtrinsicUnknown {
+  private static decodeU8aLike (registry: Registry, value: string | number[], version: number): ExtrinsicVx {
     // Instead of the block below, it should simply be:
     // return Extrinsic.decodeExtrinsic(hexToU8a(value as string));
     const u8a = u8aToU8a(value);
@@ -96,7 +98,7 @@ export default class Extrinsic extends Base<ExtrinsicVx | ExtrinsicUnknown> impl
   }
 
   /** @internal */
-  private static decodeU8a (registry: Registry, value: Uint8Array, version: number): ExtrinsicVx | ExtrinsicUnknown {
+  private static decodeU8a (registry: Registry, value: Uint8Array, version: number): ExtrinsicVx {
     if (!value.length) {
       return Extrinsic.newFromValue(registry, new Uint8Array(), version);
     }

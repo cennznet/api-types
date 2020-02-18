@@ -3,10 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
-import { ExtrinsicPayloadValue, IKeyringPair, Registry } from '@polkadot/types/types';
+import { IKeyringPair, Registry } from '@polkadot/types/types';
 
 import { ChargeTransactionPayment, Index} from '../../runtime';
 import Doughnut from '../../Doughnut';
+import { ExtrinsicPayloadValue } from '../types';
 import Compact from '@polkadot/types/codec/Compact';
 import Option from '@polkadot/types/codec/Option';
 import Struct from '@polkadot/types/codec/Struct';

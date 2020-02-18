@@ -17,7 +17,7 @@ export interface ExtrinsicSignatureOptions {
 export interface ExtrinsicPayloadValue {
     blockHash: AnyU8a;
     era: AnyU8a | IExtrinsicEra;
-    doughnut?: AnyU8a | Doughnut;
+    doughnut?: AnyU8a | Option<Doughnut>;
     genesisHash: AnyU8a;
     method: AnyU8a | IMethod;
     nonce: AnyNumber;

@@ -1,21 +1,23 @@
-import { Struct } from '@polkadot/types';
 import { Address, Call } from '@polkadot/types/interfaces/runtime';
-import { IExtrinsicImpl, IKeyringPair, Registry, SignatureOptions } from '@polkadot/types/types';
-import { ExtrinsicOptions } from '../types';
-import { ExtrinsicPayloadValueV2 } from './ExtrinsicPayload';
-import ExtrinsicSignatureV2 from './ExtrinsicSignature';
-export interface ExtrinsicValueV2 {
-    signature?: ExtrinsicSignatureV2;
+import { IExtrinsicImpl, IKeyringPair, Registry } from '@polkadot/types/types';
+import { ExtrinsicOptions } from '@polkadot/types/primitive/Extrinsic/types';
+import Struct from '@polkadot/types/codec/Struct';
+import { ExtrinsicPayloadValue, SignatureOptions } from '../types';
+import ExtrinsicSignatureV4 from './ExtrinsicSignature';
+export declare const TRANSACTION_VERSION = 4;
+export interface ExtrinsicValueV4 {
     method?: Call;
+    signature?: ExtrinsicSignatureV4;
 }
 /**
- * @name ExtrinsicV2
+ * @name GenericExtrinsicV4
  * @description
- * The second generation of compact extrinsics
+ * The fourth generation of compact extrinsics
  */
-export default class ExtrinsicV2 extends Struct implements IExtrinsicImpl {
-    constructor(registry: Registry, value?: Uint8Array | ExtrinsicValueV2 | Call, { isSigned }?: Partial<ExtrinsicOptions>);
-    static decodeExtrinsic(registry: Registry, value?: Call | Uint8Array | ExtrinsicValueV2, isSigned?: boolean): ExtrinsicValueV2;
+export default class ExtrinsicV4 extends Struct implements IExtrinsicImpl {
+    constructor(registry: Registry, value?: Uint8Array | ExtrinsicValueV4 | Call, { isSigned }?: Partial<ExtrinsicOptions>);
+    /** @internal */
+    static decodeExtrinsic(registry: Registry, value?: Call | Uint8Array | ExtrinsicValueV4, isSigned?: boolean): ExtrinsicValueV4;
     /**
      * @description The length of the value when encoded as a Uint8Array
      */
@@ -25,23 +27,23 @@ export default class ExtrinsicV2 extends Struct implements IExtrinsicImpl {
      */
     get method(): Call;
     /**
-     * @description The [[ExtrinsicSignatureV2]]
+     * @description The [[ExtrinsicSignatureV4]]
      */
-    get signature(): ExtrinsicSignatureV2;
+    get signature(): ExtrinsicSignatureV4;
     /**
      * @description The version for the signature
      */
     get version(): number;
     /**
-     * @description Add an [[ExtrinsicSignatureV2]] to the extrinsic (already generated)
+     * @description Add an [[ExtrinsicSignatureV4]] to the extrinsic (already generated)
      */
-    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValueV2 | Uint8Array | string): ExtrinsicV2;
-    /**
-     * @describe Adds a fake signature to the extrinsic
-     */
-    signFake(signer: Address | Uint8Array | string, options: SignatureOptions): ExtrinsicV2;
+    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValue | Uint8Array | string): ExtrinsicV4;
     /**
      * @description Sign the extrinsic with a specific keypair
      */
-    sign(account: IKeyringPair, options: SignatureOptions): ExtrinsicV2;
+    sign(account: IKeyringPair, options: SignatureOptions): ExtrinsicV4;
+    /**
+     * @describe Adds a fake signature to the extrinsic
+     */
+    signFake(signer: Address | Uint8Array | string, options: SignatureOptions): ExtrinsicV4;
 }

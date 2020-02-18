@@ -8,10 +8,6 @@ const create_1 = require("@polkadot/types/codec/create");
 const Base_1 = require("@polkadot/types/codec/Base");
 const constants_1 = require("./constants");
 const VERSIONS = [
-    'ExtrinsicPayloadUnknown',
-    'ExtrinsicPayloadV1',
-    'ExtrinsicPayloadV2',
-    'ExtrinsicPayloadV3',
     'ExtrinsicPayloadV4'
 ];
 /**
@@ -75,6 +71,15 @@ class ExtrinsicPayload extends Base_1.default {
     get tip() {
         // NOTE from v2+
         return this.raw.tip || create_1.createType(this.registry, 'Compact<Balance>');
+    }
+    /**
+     * @description The fee payment metadata (includes. tip)
+     */
+    get transactionPayment() {
+        return this.raw.transactionPayment;
+    }
+    get doughnut() {
+        return this.raw.doughnut;
     }
     /**
      * @description Compares the value of the input to see if there is a match

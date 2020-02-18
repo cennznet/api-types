@@ -1,68 +1,35 @@
 "use strict";
-// Copyright 2019 Centrality Investments Limited & @polkadot/types authors & contributors
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2017-2020 @polkadot/types authors & contributors & Centrality Investments Limited 2020
+// This software may be modified and distributed under the terms
+// of the Apache-2.0 license. See the LICENSE file for details.
 Object.defineProperty(exports, "__esModule", { value: true });
-// tslint:disable member-ordering no-magic-numbers
-const types_1 = require("@polkadot/types");
+const Struct_1 = require("@polkadot/types/codec/Struct");
 const util_1 = require("@polkadot/types/primitive/Extrinsic/util");
-// The base of an extrinsic payload
-exports.BasePayloadV2 = {
-    method: 'Bytes',
-    doughnut: 'Option<Doughnut>',
-    era: 'ExtrinsicEra',
-    nonce: 'Compact<Index>',
-    transactionPayment: 'ChargeTransactionPayment',
-};
-// These fields are signed here as part of the extrinsic signature but are NOT encoded in
-// the final extrinsic payload itself.
-// The CENNZnet node will populate these fields from on-chain data and check the signature compares
-// hence 'implicit'
-exports.PayloadImplicitAddonsV2 = {
-    // prml_doughnut::Option<PlugDoughnut<Doughnut, Runtime>>
-    // system::CheckVersion<Runtime>
-    specVersion: 'u32',
-    // system::CheckGenesis<Runtime>
-    genesisHash: 'Hash',
-    // system::CheckEra<Runtime>
-    blockHash: 'Hash',
-};
-// The full definition for the extrinsic payload.
-// It will be encoded (+ hashed if len > 256) and then signed to make the extrinsic signature
-exports.FullPayloadV2 = {
-    ...exports.BasePayloadV2,
-    ...exports.PayloadImplicitAddonsV2,
-};
 /**
- * @name ExtrinsicPayloadV2
+ * @name GenericExtrinsicPayloadV4
  * @description
  * A signing payload for an [[Extrinsic]]. For the final encoding, it is variable length based
  * on the contents included
- *
- *   1-8 bytes: The Transaction Compact<Index/Nonce> as provided in the transaction itself.
- *   2+ bytes: The Function Descriptor as provided in the transaction itself.
- *   1/2 bytes: The Transaction Era as provided in the transaction itself.
- *   32 bytes: The hash of the authoring block implied by the Transaction Era and the current block.
  */
-class ExtrinsicPayloadV2 extends types_1.Struct {
+class ExtrinsicPayloadV4 extends Struct_1.default {
     constructor(registry, value) {
-        super(registry, exports.FullPayloadV2, value);
+        super(registry, {
+            method: 'Bytes',
+            ...registry.getSignedExtensionTypes(),
+            ...registry.getSignedExtensionExtra()
+        }, value);
     }
     /**
      * @description The block [[Hash]] the signature applies to (mortal/immortal)
      */
     get blockHash() {
         return this.get('blockHash');
+    }
+    /**
+     * @description The [[ExtrinsicEra]]
+     */
+    get era() {
+        return this.get('era');
     }
     /**
      * @description The genesis [[Hash]] the signature applies to (mortal/immortal)
@@ -77,12 +44,6 @@ class ExtrinsicPayloadV2 extends types_1.Struct {
         return this.get('method');
     }
     /**
-     * @description The [[ExtrinsicEra]]
-     */
-    get era() {
-        return this.get('era');
-    }
-    /**
      * @description The [[Index]]
      */
     get nonce() {
@@ -95,7 +56,7 @@ class ExtrinsicPayloadV2 extends types_1.Struct {
         return this.get('specVersion');
     }
     /**
-     * @description tip (here for compatibility with [[IExtrinsic]] definition)
+     * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
      */
     get tip() {
         return this.transactionPayment.tip;
@@ -116,7 +77,11 @@ class ExtrinsicPayloadV2 extends types_1.Struct {
      * @description Sign the payload with the keypair
      */
     sign(signerPair) {
+        // NOTE The `toU8a({ method: true })` argument is absolutely critical - we don't want the method (Bytes)
+        // to have the length prefix included. This means that the data-as-signed is un-decodable,
+        // but is also doesn't need the extra information, only the pure data (and is not decoded)
+        // ... The same applies to V1..V3, if we have a V5, carry move this comment to latest
         return util_1.sign(signerPair, this.toU8a({ method: true }), { withType: true });
     }
 }
-exports.default = ExtrinsicPayloadV2;
+exports.default = ExtrinsicPayloadV4;

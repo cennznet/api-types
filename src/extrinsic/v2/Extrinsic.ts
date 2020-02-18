@@ -2,14 +2,17 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Address, Call, ExtrinsicSignatureV4 } from '@polkadot/types/interfaces/runtime';
-import { ExtrinsicPayloadValue, IExtrinsicImpl, IKeyringPair, Registry, SignatureOptions } from '@polkadot/types/types';
+import { Address, Call } from '@polkadot/types/interfaces/runtime';
+import { IExtrinsicImpl, IKeyringPair, Registry } from '@polkadot/types/types';
 import { ExtrinsicOptions } from '@polkadot/types/primitive/Extrinsic/types';
 
 import { isU8a } from '@polkadot/util';
 
 import { createType, ClassOf } from '@polkadot/types/codec/create';
 import Struct from '@polkadot/types/codec/Struct';
+
+import { ExtrinsicPayloadValue, SignatureOptions } from '../types';
+import ExtrinsicSignatureV4 from './ExtrinsicSignature';
 
 export const TRANSACTION_VERSION = 4;
 
@@ -21,7 +24,7 @@ export interface ExtrinsicValueV4 {
 /**
  * @name GenericExtrinsicV4
  * @description
- * The third generation of compact extrinsics
+ * The fourth generation of compact extrinsics
  */
 export default class ExtrinsicV4 extends Struct implements IExtrinsicImpl {
   constructor (registry: Registry, value?: Uint8Array | ExtrinsicValueV4 | Call, { isSigned }: Partial<ExtrinsicOptions> = {}) {
@@ -39,7 +42,7 @@ export default class ExtrinsicV4 extends Struct implements IExtrinsicImpl {
       return { method: value };
     } else if (isU8a(value)) {
       // here we decode manually since we need to pull through the version information
-      const signature = createType(registry, 'ExtrinsicSignatureV4', value, { isSigned });
+      const signature = new ExtrinsicSignatureV4(registry, value, { isSigned });
       const method = createType(registry, 'Call', value.subarray(signature.encodedLength));
 
       return {

@@ -2,31 +2,33 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Balance, ExtrinsicPayloadV1, ExtrinsicPayloadV2, ExtrinsicPayloadV3, ExtrinsicPayloadV4, Hash, Index } from '@polkadot/types/interfaces/runtime';
-import { BareOpts, ExtrinsicPayloadValue, IKeyringPair, InterfaceTypes, Registry } from '@polkadot/types/types';
+import { Balance, ExtrinsicPayloadV3, Hash } from '@polkadot/types/interfaces/runtime';
+import { BareOpts, IKeyringPair, InterfaceTypes, Registry } from '@polkadot/types/types';
 
 import { u8aToHex } from '@polkadot/util';
 
 import { createType } from '@polkadot/types/codec/create';
 import Base from '@polkadot/types/codec/Base';
 import Compact from '@polkadot/types/codec/Compact';
+import Option from '@polkadot/types/codec/Option';
 import Raw from '@polkadot/types/codec/Raw';
 import u32 from '@polkadot/types/primitive/U32';
 import ExtrinsicEra from '@polkadot/types/primitive/Extrinsic/ExtrinsicEra';
 import { DEFAULT_VERSION } from './constants';
+
+import ExtrinsicPayloadV4 from './v2/ExtrinsicPayload';
+import { ExtrinsicPayloadValue } from './types';
+import Doughnut from '../Doughnut';
+import { ChargeTransactionPayment, Index } from '../runtime';
 
 interface ExtrinsicPayloadOptions {
   version?: number;
 }
 
 // all our known types that can be returned
-type ExtrinsicPayloadVx = ExtrinsicPayloadV1 | ExtrinsicPayloadV2 | ExtrinsicPayloadV3 | ExtrinsicPayloadV4;
+type ExtrinsicPayloadVx = ExtrinsicPayloadV4;
 
 const VERSIONS: InterfaceTypes[] = [
-  'ExtrinsicPayloadUnknown', // v0 is unknown
-  'ExtrinsicPayloadV1',
-  'ExtrinsicPayloadV2',
-  'ExtrinsicPayloadV3',
   'ExtrinsicPayloadV4'
 ];
 
@@ -69,7 +71,7 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
    */
   public get genesisHash (): Hash {
     // NOTE only v3+
-    return (this.raw as ExtrinsicPayloadV3).genesisHash || createType(this.registry, 'Hash');
+    return (this.raw as ExtrinsicPayloadV4).genesisHash || createType(this.registry, 'Hash');
   }
 
   /**
@@ -91,7 +93,7 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
    */
   public get specVersion (): u32 {
     // NOTE only v3+
-    return (this.raw as ExtrinsicPayloadV3).specVersion || createType(this.registry, 'u32');
+    return (this.raw as ExtrinsicPayloadV4).specVersion || createType(this.registry, 'u32');
   }
 
   /**
@@ -99,7 +101,18 @@ export default class ExtrinsicPayload extends Base<ExtrinsicPayloadVx> {
    */
   public get tip (): Compact<Balance> {
     // NOTE from v2+
-    return (this.raw as ExtrinsicPayloadV2).tip || createType(this.registry, 'Compact<Balance>');
+    return (this.raw as ExtrinsicPayloadV4).tip || createType(this.registry, 'Compact<Balance>');
+  }
+
+  /**
+   * @description The fee payment metadata (includes. tip)
+   */
+  public get transactionPayment (): ChargeTransactionPayment {
+    return (this.raw as ExtrinsicPayloadV4).transactionPayment;
+  }
+
+  public get doughnut (): Option<Doughnut> {
+    return (this.raw as ExtrinsicPayloadV4).doughnut
   }
 
   /**
