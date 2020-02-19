@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Extrinsic related type defintions
+
 import Option from '@polkadot/types/codec/Option';
 import { ExtrinsicSignatureOptions as ExtrinsicSignatureOptionsBase } from '@polkadot/types/primitive/Extrinsic/types';
-import {InterfaceRegistry} from '@polkadot/types/interfaceRegistry';
 import {
   AnyU8a,
   ExtrinsicPayloadValue as ExtrinsicPayloadValueBase,
@@ -39,19 +40,3 @@ export interface SignatureOptions extends SignatureOptionsBase {
   transactionPayment?: AnyU8a | ChargeTransactionPayment;
 }
 
-export type CennznetInterfaceTypes = keyof InterfaceRegistry;
-
-// TODO: This should be generated using upstream script, not done this way
-// Merge the [[InterfaceRegistry]] definition from `@polkadot/types/interfaceRegistry` with CENNZnet types
-declare module '@polkadot/types/interfaceRegistry' {
-  interface InterfaceRegistry {
-    // Add types that only CENNZnet knows about.
-    // TS will merge them into the polkadot provided [[InterfaceRegistry]]
-    Doughnut: Doughnut;
-    'Option<Doughnut>': Option<Doughnut>;
-    ChargeTransactionPayment;
-    FeeExchange: FeeExchange;
-    'Option<FeeExchange>': Option<FeeExchange>;
-    CENNZnetExtrinsicSignatureV1;
-  }
-}

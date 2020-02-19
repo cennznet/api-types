@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import CENNZnetTypes from '@cennznet/api-types/injects';
-import CENNZnetExtrinsicSignatureV1 from '@cennznet/api-types/extrinsic/v1/ExtrinsicSignature';
 import {ApiPromise, Keyring, WsProvider} from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types';
 import {cryptoWaitReady} from '@polkadot/util-crypto';

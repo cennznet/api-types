@@ -2,19 +2,13 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { Bytes, Compact, Option, Struct, u32 } from '@polkadot/types';
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
+import { sign } from '@polkadot/types/primitive/Extrinsic/util';
 import { IKeyringPair, Registry } from '@polkadot/types/types';
 
-import { ChargeTransactionPayment, Index} from '../../runtime';
-import Doughnut from '../../Doughnut';
 import { ExtrinsicPayloadValue } from '../types';
-import Compact from '@polkadot/types/codec/Compact';
-import Option from '@polkadot/types/codec/Option';
-import Struct from '@polkadot/types/codec/Struct';
-import Bytes from '@polkadot/types/primitive/Bytes';
-import u32 from '@polkadot/types/primitive/U32';
-import { sign } from '@polkadot/types/primitive/Extrinsic/util';
-import {CennznetInterfaceTypes} from '../types';
+import { ChargeTransactionPayment, CennznetInterfaceTypes, Doughnut, Index } from  '../../types';
 
 
 // TODO: Load [[Extra]] from metadata e.g.:

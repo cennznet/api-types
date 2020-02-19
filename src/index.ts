@@ -12,5 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export * from './extrinsic';
-export * from './runtime';
+export * from './types';
+export {default as CENNZnetRuntimeTypes} from './injects';

@@ -3,19 +3,14 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
+import { Compact, Option, Struct, createType } from '@polkadot/types';
 import { IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
-import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions, SignatureOptions } from '../types';
-
+import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/primitive/Extrinsic/constants';
 import { u8aConcat } from '@polkadot/util';
 
-import { ChargeTransactionPayment, Index } from '../../runtime';
-import Doughnut from '../../Doughnut';
-import { createType } from '@polkadot/types/codec/create';
-import Compact from '@polkadot/types/codec/Compact';
-import Option from '@polkadot/types/codec/Option';
-import Struct from '@polkadot/types/codec/Struct';
-import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/primitive/Extrinsic/constants';
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
+import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions, SignatureOptions } from '../types';
+import { ChargeTransactionPayment, Doughnut, Index } from '../../types';
 
 /**
  * @name CENNZnetExtrinsicSignatureV1

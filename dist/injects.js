@@ -1,3 +1,4 @@
+"use strict";
 // Copyright 2019-2020 Centrality Investments Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,21 +12,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+Object.defineProperty(exports, "__esModule", { value: true });
 // CENNZnet types for injection into a polkadot API session
-
-import Doughnut from './Doughnut';
-import { CENNZnetExtrinsicSignatureV1, SignerPayload } from './extrinsic';
-import * as runtimeTypes from './runtime';
-
-export default {
-  ...runtimeTypes,
-  // We override the substrate v4 extrinsic signature type in CENNZnet
-  ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1,
-  SignerPayload,
-  RewardBalance: 'Balance',
-  Doughnut,
-  AssetOf: 'u128',
-  'ed25519::Signature': 'H512',
+const Doughnut_1 = require("./Doughnut");
+const extrinsic_1 = require("./extrinsic");
+const runtimeTypes = require("./runtime");
+exports.default = {
+    ...runtimeTypes,
+    // We override the substrate v4 extrinsic signature type in CENNZnet
+    ExtrinsicSignatureV4: extrinsic_1.CENNZnetExtrinsicSignatureV1,
+    SignerPayload: extrinsic_1.SignerPayload,
+    RewardBalance: 'Balance',
+    Doughnut: Doughnut_1.default,
+    AssetOf: 'u128',
+    'ed25519::Signature': 'H512',
 };
-

@@ -12,20 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// CENNZnet types for injection into a polkadot API session
-
-import Doughnut from './Doughnut';
-import { CENNZnetExtrinsicSignatureV1, SignerPayload } from './extrinsic';
-import * as runtimeTypes from './runtime';
-
-export default {
-  ...runtimeTypes,
-  // We override the substrate v4 extrinsic signature type in CENNZnet
-  ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1,
-  SignerPayload,
-  RewardBalance: 'Balance',
-  Doughnut,
-  AssetOf: 'u128',
-  'ed25519::Signature': 'H512',
-};
-
+export {default as CENNZnetExtrinsicPayloadV1} from './v1/ExtrinsicPayload';
+export {default as CENNZnetExtrinsicSignatureV1} from './v1/ExtrinsicSignature';
+export {default as SignerPayload} from './SignerPayload';
