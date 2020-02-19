@@ -11,15 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+// Types for injection into an API session with the CENNZnet runtime
+
 import Doughnut from './Doughnut';
-import * as extrinsicTypes from './extrinsic';
+import CENNZnetExtrinsicSignatureV1 from './extrinsic/v1/ExtrinsicSignature';
+import SignerPayload from './extrinsic/SignerPayload';
 import * as runtimeTypes from './runtime';
 
 export default {
   ...runtimeTypes,
-  //...extrinsicTypes,
-  AssetOf: 'u128',
-  'ed25519::Signature': 'H512',
+  // We override the substrate v4 extrinsic signature type in CENNZnet
+  ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1 
+  SignerPayload: SignerPayload,
   RewardBalance: 'Balance',
   Doughnut: Doughnut,
+  AssetOf: 'u128',
+  'ed25519::Signature': 'H512',
 };

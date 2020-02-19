@@ -2,7 +2,7 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import {Compact, createType, Option, Struct, u8} from '@polkadot/types';
+import {Compact, Option, Struct, u8} from '@polkadot/types';
 import {
   Address,
   Balance,
@@ -10,7 +10,6 @@ import {
   Call,
   ExtrinsicEra,
   Hash,
-  Index,
   RuntimeVersion,
 } from '@polkadot/types/interfaces';
 import {
@@ -22,14 +21,16 @@ import {
 } from '@polkadot/types/types';
 import {u8aToHex} from '@polkadot/util';
 
+import {Index} from '../types';
 import Doughnut from '../Doughnut';
 import {ChargeTransactionPayment} from '../runtime/transaction-payment';
-import ExtrinsicPayload from './ExtrinsicPayload';
+import CENNZnetExtrinsicPayloadV1 from './v1/ExtrinsicPayload';
 
 export interface SignerPayloadType extends Struct {
   address: Address;
   blockHash: Hash;
   blockNumber: BlockNumber;
+  doughnut: Option<Doughnut>;
   era: ExtrinsicEra;
   genesisHash: Hash;
   method: Call;
@@ -37,7 +38,6 @@ export interface SignerPayloadType extends Struct {
   runtimeVersion: RuntimeVersion;
   tip: Compact<Balance>;
   version: u8;
-  doughnut: Option<Doughnut>;
   transactionPayment: ChargeTransactionPayment;
 }
 
@@ -52,6 +52,7 @@ export const _Payload: Constructor<SignerPayloadType> = Struct.with({
   address: 'Address',
   blockHash: 'Hash',
   blockNumber: 'BlockNumber',
+  doughnut: Option.with(Doughnut),
   era: 'ExtrinsicEra',
   genesisHash: 'Hash',
   method: 'Call',
@@ -59,7 +60,6 @@ export const _Payload: Constructor<SignerPayloadType> = Struct.with({
   runtimeVersion: 'RuntimeVersion',
   tip: 'Compact<Balance>',
   version: 'u8',
-  doughnut: Option.with(Doughnut),
   transactionPayment: 'ChargeTransactionPayment',
 }) as any;
 
@@ -72,6 +72,7 @@ export default class SignerPayload extends _Payload implements ISignerPayload {
       address,
       blockHash,
       blockNumber,
+      doughnut,
       era,
       genesisHash,
       method,
@@ -79,7 +80,6 @@ export default class SignerPayload extends _Payload implements ISignerPayload {
       runtimeVersion: {specVersion},
       tip,
       version,
-      doughnut,
       transactionPayment,
     } = this;
     const ret: SignerPayloadJSON = {
@@ -109,7 +109,7 @@ export default class SignerPayload extends _Payload implements ISignerPayload {
     // const registry = new TypeRegistry();
     // NOTE Explicitly pass the bare flag so the method is encoded un-prefixed (non-decodable, for signing only)
     const data = u8aToHex(
-      new ExtrinsicPayload(this.registry, payload, {version: payload.version}).toU8a({method: true})
+      new CENNZnetExtrinsicPayloadV1(this.registry, payload, {version: payload.version}).toU8a({method: true})
     );
 
     return {

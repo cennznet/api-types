@@ -14,16 +14,16 @@ import { createType } from '@polkadot/types/codec/create';
 import Compact from '@polkadot/types/codec/Compact';
 import Option from '@polkadot/types/codec/Option';
 import Struct from '@polkadot/types/codec/Struct';
-import { EMPTY_U8A, IMMORTAL_ERA } from '../constants';
+import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/primitive/Extrinsic/constants';
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
 
 /**
- * @name GenericExtrinsicSignatureV4
+ * @name CENNZnetExtrinsicSignatureV1
  * @description
  * A container for the [[Signature]] associated with a specific [[Extrinsic]]
  */
-export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSignature {
-  constructor (registry: Registry, value: ExtrinsicSignatureV4 | Uint8Array | undefined, { isSigned }: ExtrinsicSignatureOptions = {}) {
+export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExtrinsicSignature {
+  constructor (registry: Registry, value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, { isSigned }: ExtrinsicSignatureOptions = {}) {
     super(registry, {
       signer: 'Address',
       signature: 'MultiSignature',
@@ -34,14 +34,14 @@ export default class ExtrinsicSignatureV4 extends Struct implements IExtrinsicSi
       era: 'ExtrinsicEra',
       nonce: 'Compact<Index>',
       transactionPayment: 'ChargeTransactionPayment',
-    }, ExtrinsicSignatureV4.decodeExtrinsicSignature(value, isSigned));
+    }, CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned));
   }
 
   /** @internal */
-  public static decodeExtrinsicSignature (value: ExtrinsicSignatureV4 | Uint8Array | undefined, isSigned = false): ExtrinsicSignatureV4 | Uint8Array {
+  public static decodeExtrinsicSignature (value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, isSigned = false): CENNZnetExtrinsicSignatureV1 | Uint8Array {
     if (!value) {
       return EMPTY_U8A;
-    } else if (value instanceof ExtrinsicSignatureV4) {
+    } else if (value instanceof CENNZnetExtrinsicSignatureV1) {
       return value;
     }
 

@@ -12,14 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Copyright 2017-2018 @polkadot/api authors & contributors
-// This software may be modified and distributed under the terms
-// of the Apache-2.0 license. See the LICENSE file for details.
-
-import Types from '@cennznet/api-types/injects';
-import ExtrinsicV4 from '@cennznet/api-types/extrinsic/v2/Extrinsic';
-import ExtrinsicPayloadV4 from '@cennznet/api-types/extrinsic/v2/ExtrinsicPayload';
-import ExtrinsicSignatureV4 from '@cennznet/api-types/extrinsic/v2/ExtrinsicSignature';
+import CENNZnetTypes from '@cennznet/api-types/injects';
+import CENNZnetExtrinsicSignatureV1 from '@cennznet/api-types/extrinsic/v1/ExtrinsicSignature';
 import {ApiPromise, Keyring, WsProvider} from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types';
 import {cryptoWaitReady} from '@polkadot/util-crypto';
@@ -35,13 +29,10 @@ describe('e2e transactions', () => {
     const keyring = new Keyring({ type: 'sr25519' });
     alice = keyring.addFromUri('//Alice');
     bob = keyring.addFromUri('//Bob');
-
     api = await ApiPromise.create({
       provider: new WsProvider('ws://localhost:9944'),
       types: {
-        ...Types,
-        ExtrinsicPayloadV4: ExtrinsicPayloadV4,
-        ExtrinsicSignatureV4: ExtrinsicSignatureV4
+        ...CENNZnetTypes,
       },
       registry
     });

@@ -13,48 +13,26 @@
 // limitations under the License.
 
 import Option from '@polkadot/types/codec/Option';
+import { ExtrinsicSignatureOptions as ExtrinsicSignatureOptionsBase } from '@polkadot/types/primitive/Extrinsic/types';
 import {InterfaceRegistry} from '@polkadot/types/interfaceRegistry';
 import {
-  AnyNumber,
   AnyU8a,
-  IExtrinsicEra,
-  IMethod,
-  RuntimeVersionInterface,
+  ExtrinsicPayloadValue as ExtrinsicPayloadValueBase,
   SignatureOptions as SignatureOptionsBase,
 } from '@polkadot/types/types';
 import Doughnut from '../Doughnut';
 import {ChargeTransactionPayment, FeeExchange} from '../runtime/transaction-payment';
+import CENNZnetExtrinsicSignatureV1 from './v1/ExtrinsicSignature';
 
-export interface ExtrinsicSignatureOptions {
-  isSigned?: boolean;
-  blockHash?: AnyU8a;
-  era?: IExtrinsicEra;
+export interface ExtrinsicSignatureOptions extends ExtrinsicSignatureOptionsBase {
   doughnut?: Option<Doughnut>;
-  genesisHash?: AnyU8a;
-  nonce?: AnyNumber;
-  runtimeVersion?: RuntimeVersionInterface;
-  tip?: AnyNumber;
   transactionPayment?: ChargeTransactionPayment;
 }
 
-export interface ExtrinsicPayloadValue {
-  blockHash: AnyU8a;
-  era: AnyU8a | IExtrinsicEra;
+export interface ExtrinsicPayloadValue extends ExtrinsicPayloadValueBase {
   doughnut?: AnyU8a | Option<Doughnut>;
-  genesisHash: AnyU8a;
-  method: AnyU8a | IMethod;
-  nonce: AnyNumber;
-  specVersion: AnyNumber;
-  tip: AnyNumber;
   transactionPayment?: AnyU8a | ChargeTransactionPayment;
 }
-
-export type DoughnutValue = AnyU8a;
-
-export type FeeExchangeValue = {
-  assetId: AnyNumber;
-  maxPayment: AnyNumber;
-};
 
 export interface SignatureOptions extends SignatureOptionsBase {
   doughnut?: AnyU8a | Doughnut;
@@ -74,5 +52,6 @@ declare module '@polkadot/types/interfaceRegistry' {
     ChargeTransactionPayment;
     FeeExchange: FeeExchange;
     'Option<FeeExchange>': Option<FeeExchange>;
+    CENNZnetExtrinsicSignatureV1;
   }
 }

@@ -17,6 +17,3 @@ export * from './cennzx';
 export * from './ga';
 export * from './sylo';
 export * from './transaction-payment';
-
-// The CENNZnet nonce type
-export {u64 as Index} from '@polkadot/types';
