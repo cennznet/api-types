@@ -22,8 +22,7 @@ import {
   SignatureOptions as SignatureOptionsBase,
 } from '@polkadot/types/types';
 import Doughnut from '../Doughnut';
-import {ChargeTransactionPayment, FeeExchange} from '../runtime/transaction-payment';
-import CENNZnetExtrinsicSignatureV1 from './v1/ExtrinsicSignature';
+import {ChargeTransactionPayment } from '../runtime/transaction-payment';
 
 export interface ExtrinsicSignatureOptions extends ExtrinsicSignatureOptionsBase {
   doughnut?: Option<Doughnut>;

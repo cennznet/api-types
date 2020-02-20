@@ -22,7 +22,7 @@ import {Registry} from '@polkadot/types/types';
  * paid in `assetId` by paying up to `maxPayment` after the exchange rate is calculated.
  */
 export class FeeExchangeV1 extends Struct {
-  constructor(registry: Registry, value?: any) {
+  constructor(registry: Registry, value?: {assetId: AssetId; maxPayment: Balance}) {
     super(registry, {assetId: 'Compact<AssetId>', maxPayment: 'Compact<Balance>'}, value);
   }
   get assetId(): AssetId {
@@ -38,7 +38,7 @@ export class FeeExchangeV1 extends Struct {
 // export class FeeExchange extends Enum.with({FeeExchangeV1}) {}
 
 export class FeeExchange extends Enum {
-  constructor(registry: Registry, value: any) {
+  constructor(registry: Registry, value: FeeExchangeV1) {
     super(registry, {FeeExchangeV1: FeeExchangeV1}, value);
   }
 }
@@ -48,7 +48,7 @@ export class FeeExchange extends Enum {
  * when added to an extrinsic payload.
  */
 export class ChargeTransactionPayment extends Struct {
-  constructor(registry: Registry, value: any) {
+  constructor(registry: Registry, value: {tip: Balance; feeExchange?: FeeExchange}) {
     super(registry, {tip: 'Compact<Balance>', feeExchange: 'Option<FeeExchange>'}, value);
   }
 

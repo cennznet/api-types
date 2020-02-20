@@ -13,22 +13,16 @@
 // limitations under the License.
 
 import '@polkadot/types/injector';
-import {createTypeUnsafe, TypeRegistry, u32} from '@polkadot/types';
+import {createTypeUnsafe, TypeRegistry} from '@polkadot/types';
 
 import * as gaTypes from './';
 import AssetOptions from './AssetOptions';
 import PermissionsV1 from './PermissionsV1';
-import ExchangeKey from '@cennznet/types/runtime/cennzx/ExchangeKey';
-import FeeRate from '@cennznet/types/runtime/cennzx/FeeRate';
 
 const BOB = '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty';
 
 const registry = new TypeRegistry();
 registry.register(gaTypes);
-// registry.register(gaTypes);
-// registry.register(typeof u32, gaTypes.AssetId);
-// registry.register(typeof AssetOptions, AssetOptions);
-// registry.register(typeof gaTypes.Owner, gaTypes.Owner);
 
 describe('ga types', () => {
   describe('Permission', () => {

@@ -22,7 +22,7 @@ import {Registry} from '@polkadot/types/types';
 import PermissionLatest from './PermissionsV1';
 
 export default class AssetOptions extends Struct {
-  constructor(registry: Registry, value: any) {
+  constructor(registry: Registry, value: {initialIssuance: Balance; permissions: PermissionLatest}) {
     super(registry, {initialIssuance: 'Compact<Balance>', permissions: PermissionLatest}, value);
   }
 

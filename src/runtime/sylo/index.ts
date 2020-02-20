@@ -16,7 +16,34 @@ import {ClassOf, Enum, Struct, Text, Tuple, TypeRegistry, Vec} from '@polkadot/t
 import {Registry} from '@polkadot/types/types';
 import {u8aToHex} from '@polkadot/util';
 
+
 const GROUP_JSON_MAP = new Map([['groupId', 'group_id']]);
+const MEMBER_JSON_MAP = new Map([['userId', 'user_id']]);
+const INVITE_JSON_MAP = new Map([
+  ['peerId', 'peer_id'],
+  ['inviteData', 'invite_data'],
+  ['inviteKey', 'invite_key'],
+]);
+const PENDING_INVITE_JSON_MAP = new Map([['inviteKey', 'invite_key']]);
+
+
+export class Meta extends Vec.with(Tuple.with([Text, Text])) {}
+
+export class MemberRoles extends Enum.with(['AdminRole', 'MemberRole']) {}
+
+export class Member extends Struct {
+  constructor(registry: Registry, value) {
+    super(registry, {userId: 'AccountId', roles: Vec.with(MemberRoles), meta: Meta}, value, MEMBER_JSON_MAP);
+  }
+
+  toJSON() {
+    return {
+      user_id: u8aToHex(this.get('userId').toU8a(), -1, false),
+      roles: this.get('roles').toJSON(),
+      meta: this.get('meta').toJSON(),
+    };
+  }
+}
 
 export class Group extends Struct {
   constructor(registry: Registry, value) {
@@ -34,32 +61,6 @@ export class Group extends Struct {
   }
 }
 
-const MEMBER_JSON_MAP = new Map([['userId', 'user_id']]);
-
-export class Member extends Struct {
-  constructor(registry: Registry, value) {
-    super(registry, {userId: 'AccountId', roles: Vec.with(MemberRoles), meta: Meta}, value, MEMBER_JSON_MAP);
-  }
-
-  toJSON() {
-    return {
-      user_id: u8aToHex(this.get('userId').toU8a(), -1, false),
-      roles: this.get('roles').toJSON(),
-      meta: this.get('meta').toJSON(),
-    };
-  }
-}
-
-export class MemberRoles extends Enum.with(['AdminRole', 'MemberRole']) {}
-
-export class Meta extends Vec.with(Tuple.with([Text, Text])) {}
-
-const INVITE_JSON_MAP = new Map([
-  ['peerId', 'peer_id'],
-  ['inviteData', 'invite_data'],
-  ['inviteKey', 'invite_key'],
-]);
-
 export class Invite extends Struct {
   constructor(registry: Registry, value) {
     super(
@@ -76,8 +77,6 @@ export class Invite extends Struct {
     );
   }
 }
-
-const PENDING_INVITE_JSON_MAP = new Map([['inviteKey', 'invite_key']]);
 
 export class PendingInvite extends Struct {
   constructor(registry: Registry, value) {

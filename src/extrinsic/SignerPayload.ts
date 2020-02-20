@@ -33,7 +33,6 @@ import {u8aToHex} from '@polkadot/util';
 import {Address, Index} from '../types';
 import Doughnut from '../Doughnut';
 import {ChargeTransactionPayment} from '../runtime/transaction-payment';
-import CENNZnetExtrinsicPayloadV1 from './v1/ExtrinsicPayload';
 
 export interface SignerPayloadJSON extends SignerPayloadJSONBase {
   doughnut?: string;
@@ -49,7 +48,7 @@ export interface SignerPayloadType extends Codec {
   method: Call;
   nonce: Compact<Index>;
   runtimeVersion: RuntimeVersion;
-  tip: Compact<Balance>;
+  tip?: Compact<Balance>;
   version: u8;
   doughnut: Option<Doughnut>;
   transactionPayment: ChargeTransactionPayment;

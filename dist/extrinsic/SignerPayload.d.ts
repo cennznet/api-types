@@ -17,7 +17,7 @@ export interface SignerPayloadType extends Codec {
     method: Call;
     nonce: Compact<Index>;
     runtimeVersion: RuntimeVersion;
-    tip: Compact<Balance>;
+    tip?: Compact<Balance>;
     version: u8;
     doughnut: Option<Doughnut>;
     transactionPayment: ChargeTransactionPayment;

@@ -13,13 +13,13 @@
 // limitations under the License.
 
 /*
-    Custom `Topic` type for Attestation module.
+  Custom `Topic` type for Attestation module.
  */
 import {ClassOf, TypeRegistry} from '@polkadot/types';
 import {Registry} from '@polkadot/types/types';
 import {isHex, isString, stringToU8a, u8aToString} from '@polkadot/util';
 
-function isAscii(str: string) {
+function isAscii(str: string): boolean {
   return /^[\x20-\x7E]*$/.test(str);
 }
 
@@ -34,7 +34,7 @@ function validateTopic(topic: string) {
   }
 }
 
-function stripTrailingZero(value: Uint8Array) {
+function stripTrailingZero(value: Uint8Array): Uint8Array {
   let endPos = value.length - 1;
   for (let i = endPos; i > -1; i--) {
     if (value[i] !== 0) {
