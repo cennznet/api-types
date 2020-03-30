@@ -1,4 +1,4 @@
-# @cennznet/types
+# @cennznet/api-types
 
 API type definitions for the CENNZnet runtime
 
@@ -28,6 +28,7 @@ async function main() {
   //...
 
 }
+```
 
 
 ## Build
@@ -39,4 +40,4 @@ curl -H "Content-Type: application/json" -d '{"id":"1", "jsonrpc":"2.0", "method
 # Generate the types
 yarn build
 ```
-Additionally, `definitions.ts` should be upated with any new type structure.
+Additionally, `definitions.ts` should be upated with any new type structures from the runtime.
