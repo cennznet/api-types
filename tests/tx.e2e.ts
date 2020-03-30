@@ -24,8 +24,6 @@ describe('e2e transactions', () => {
 
   beforeAll(async () => {
     await cryptoWaitReady();
-    console.log("CENNZNET TYPES:");
-    console.log(CENNZnetTypes);
     const keyring = new Keyring({ type: 'sr25519' });
     alice = keyring.addFromUri('//Alice');
     bob = keyring.addFromUri('//Bob');
@@ -36,6 +34,8 @@ describe('e2e transactions', () => {
       },
       registry
     });
+    // compatibility patch, don't use upstream composite account
+    api.query.system.account = api.query.system.accountNonce;
 
   });
 
@@ -56,7 +56,6 @@ describe('e2e transactions', () => {
         }
       });
     });
-
 
     it('does a GA transfer with keypair via signAndSend', async done => {
       await api.tx.genericAsset.transfer(16001, bob.address, 123).signAndSend(alice, async ({events, status}) => {

@@ -1,7 +1,10 @@
 import { Enum, Struct, Tuple, Vec } from '@polkadot/types';
 import { Registry } from '@polkadot/types/types';
-export declare class Group extends Struct {
-    constructor(registry: Registry, value: any);
+declare const Meta_base: import("@polkadot/types/types").Constructor<Vec<Tuple>>;
+export declare class Meta extends Meta_base {
+}
+declare const MemberRoles_base: import("@polkadot/types/codec/Enum").EnumConstructor<Enum>;
+export declare class MemberRoles extends MemberRoles_base {
 }
 export declare class Member extends Struct {
     constructor(registry: Registry, value: any);
@@ -11,11 +14,8 @@ export declare class Member extends Struct {
         meta: import("@polkadot/types/types").AnyJson;
     };
 }
-declare const MemberRoles_base: import("@polkadot/types/codec/Enum").EnumConstructor<Enum>;
-export declare class MemberRoles extends MemberRoles_base {
-}
-declare const Meta_base: import("@polkadot/types/types").Constructor<Vec<Tuple>>;
-export declare class Meta extends Meta_base {
+export declare class Group extends Struct {
+    constructor(registry: Registry, value: any);
 }
 export declare class Invite extends Struct {
     constructor(registry: Registry, value: any);

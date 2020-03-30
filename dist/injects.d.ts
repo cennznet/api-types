@@ -18,10 +18,10 @@ declare const _default: {
     PermissionsV1: typeof runtimeTypes.PermissionsV1;
     PermissionLatest: typeof runtimeTypes.PermissionsV1;
     PermissionVersions: typeof runtimeTypes.PermissionVersions;
-    Group: typeof runtimeTypes.Group;
-    Member: typeof runtimeTypes.Member;
-    MemberRoles: typeof runtimeTypes.MemberRoles;
     Meta: typeof runtimeTypes.Meta;
+    MemberRoles: typeof runtimeTypes.MemberRoles;
+    Member: typeof runtimeTypes.Member;
+    Group: typeof runtimeTypes.Group;
     Invite: typeof runtimeTypes.Invite;
     PendingInvite: typeof runtimeTypes.PendingInvite;
     AcceptPayload: typeof runtimeTypes.AcceptPayload;

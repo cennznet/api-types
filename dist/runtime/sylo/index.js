@@ -16,18 +16,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const types_1 = require("@polkadot/types");
 const util_1 = require("@polkadot/util");
 const GROUP_JSON_MAP = new Map([['groupId', 'group_id']]);
-class Group extends types_1.Struct {
-    constructor(registry, value) {
-        super(registry, {
-            groupId: 'H256',
-            members: types_1.Vec.with(Member),
-            invites: types_1.Vec.with(PendingInvite),
-            meta: Meta,
-        }, value, GROUP_JSON_MAP);
-    }
-}
-exports.Group = Group;
 const MEMBER_JSON_MAP = new Map([['userId', 'user_id']]);
+const INVITE_JSON_MAP = new Map([
+    ['peerId', 'peer_id'],
+    ['inviteData', 'invite_data'],
+    ['inviteKey', 'invite_key'],
+]);
+const PENDING_INVITE_JSON_MAP = new Map([['inviteKey', 'invite_key']]);
+class Meta extends types_1.Vec.with(types_1.Tuple.with([types_1.Text, types_1.Text])) {
+}
+exports.Meta = Meta;
+class MemberRoles extends types_1.Enum.with(['AdminRole', 'MemberRole']) {
+}
+exports.MemberRoles = MemberRoles;
 class Member extends types_1.Struct {
     constructor(registry, value) {
         super(registry, { userId: 'AccountId', roles: types_1.Vec.with(MemberRoles), meta: Meta }, value, MEMBER_JSON_MAP);
@@ -41,17 +42,17 @@ class Member extends types_1.Struct {
     }
 }
 exports.Member = Member;
-class MemberRoles extends types_1.Enum.with(['AdminRole', 'MemberRole']) {
+class Group extends types_1.Struct {
+    constructor(registry, value) {
+        super(registry, {
+            groupId: 'H256',
+            members: types_1.Vec.with(Member),
+            invites: types_1.Vec.with(PendingInvite),
+            meta: Meta,
+        }, value, GROUP_JSON_MAP);
+    }
 }
-exports.MemberRoles = MemberRoles;
-class Meta extends types_1.Vec.with(types_1.Tuple.with([types_1.Text, types_1.Text])) {
-}
-exports.Meta = Meta;
-const INVITE_JSON_MAP = new Map([
-    ['peerId', 'peer_id'],
-    ['inviteData', 'invite_data'],
-    ['inviteKey', 'invite_key'],
-]);
+exports.Group = Group;
 class Invite extends types_1.Struct {
     constructor(registry, value) {
         super(registry, {
@@ -64,7 +65,6 @@ class Invite extends types_1.Struct {
     }
 }
 exports.Invite = Invite;
-const PENDING_INVITE_JSON_MAP = new Map([['inviteKey', 'invite_key']]);
 class PendingInvite extends types_1.Struct {
     constructor(registry, value) {
         super(registry, { inviteKey: 'H256', meta: Meta, roles: types_1.Vec.with(MemberRoles) }, value, PENDING_INVITE_JSON_MAP);

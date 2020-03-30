@@ -14,7 +14,7 @@
 // limitations under the License.
 Object.defineProperty(exports, "__esModule", { value: true });
 /*
-    Custom `Topic` type for Attestation module.
+  Custom `Topic` type for Attestation module.
  */
 const types_1 = require("@polkadot/types");
 const util_1 = require("@polkadot/util");

@@ -28,3 +28,9 @@ async function main() {
   //...
 
 }
+
+
+## Build
+```bash
+yarn build
+```

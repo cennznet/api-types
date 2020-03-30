@@ -23,6 +23,7 @@ module.exports = {
       tsConfig: 'tsconfig.json',
     },
   },
+  testTimeout: 15000,
   preset: 'ts-jest',
   testMatch: null,
 }
