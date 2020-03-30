@@ -31,6 +31,12 @@ async function main() {
 
 
 ## Build
+To re-generate type definitions from metadata run the following:
 ```bash
+# Get metadata from local CENNZnet node running target version
+curl -H "Content-Type: application/json" -d '{"id":"1", "jsonrpc":"2.0", "method": "state_getMetadata", "params":[]}' http://localhost:9933 > cennznet.json
+
+# Generate the types
 yarn build
 ```
+Additionally, `definitions.ts` should be upated with any new type structure.
