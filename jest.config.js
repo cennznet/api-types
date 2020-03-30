@@ -7,7 +7,7 @@ module.exports = {
     'ts',
   ],
   moduleNameMapper: {
-    '@cennznet/api-types(.*)$': '<rootDir>/src/$1',
+    '@cennznet/api-types(.*)$': '<rootDir>/src/interfaces/$1',
   },
   testRegex: [
     '.*.e2e.ts',

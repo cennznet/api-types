@@ -1,6 +1,6 @@
 {
     "name": "@cennznet/api-types",
-    "version": "1.0.0-rc2",
+    "version": "1.0.0",
     "description": "Type definitions for CENNZnet node",
     "author": "Centrality Developers <developers@centrality.ai>",
     "keywords": [
@@ -15,18 +15,22 @@
         "url": "git+ssh://git@github.com/cennznet/api-types.git"
     },
     "scripts": {
-        "test": "jest"
+        "test": "jest",
+        "build": "yarn generate:defs && yarn generate:meta",
+        "generate:defs": "ts-node --skip-project node_modules/.bin/polkadot-types-from-defs --package @cennznet/api-types/interfaces --input ./src/interfaces",
+        "generate:meta": "ts-node --skip-project node_modules/.bin/polkadot-types-from-chain --package @cennznet/api-types/interfaces --endpoint ./cennznet.json --output ./src/interfaces"
     },
     "dependencies": {
         "@polkadot/keyring": "^2.3.1",
-        "@polkadot/types": "^1.1.1",
+        "@polkadot/types": "^1.8.1",
         "@polkadot/util": "^2.3.1",
         "memoizee": "^0.4.14"
     },
     "devDependencies": {
-        "@polkadot/api": "^1.1.1",
-        "@polkadot/rpc-provider": "^1.1.1",
-        "@polkadot/types": "^1.1.1",
+        "@polkadot/api": "^1.8.1",
+        "@polkadot/typegen": "^1.8.1",
+        "@polkadot/rpc-provider": "^1.8.1",
+        "@polkadot/types": "^1.8.1",
         "@polkadot/util": "^2.3.1",
         "@types/bn.js": "^4.11.6",
         "@types/jest": "^25.1.2",
@@ -41,6 +45,7 @@
         "jest": "^25.1.0",
         "prettier": "^1.19.1",
         "ts-jest": "^25.2.0",
-        "typescript": "^3.7.5"
+        "ts-node": "^8.6.2",
+        "typescript": "^3.8.3"
     }
 }

@@ -10,7 +10,16 @@
     "resolveJsonModule": true,
     "declaration": true
   },
-  "include": [
-    "./src/*"
+  "paths": {
+    "@cennznet/api-types/*": ["src/interfaces/*"],
+    "@polkadot/api/augment": ["src/interfaces/augment-api.ts"],
+    "@polkadot/types/augment": ["src/interfaces/augment-types.ts"]
+  },
+  "typeRoots": [
+    "./node_modules/@types"
+  ],
+  "exclude": [
+    "dist/**/*",
+    "node_modules"
   ]
 }

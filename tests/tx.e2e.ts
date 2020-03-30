@@ -24,7 +24,8 @@ describe('e2e transactions', () => {
 
   beforeAll(async () => {
     await cryptoWaitReady();
-
+    console.log("CENNZNET TYPES:");
+    console.log(CENNZnetTypes);
     const keyring = new Keyring({ type: 'sr25519' });
     alice = keyring.addFromUri('//Alice');
     bob = keyring.addFromUri('//Bob');

@@ -9,7 +9,7 @@ Add as dependency
 // package.json
 {
   "dependencies": {
-    "@cennznet/api-types": "https://github.com/cennznet/api-types.git#1.0.0-rc2"
+    "@cennznet/api-types": "https://github.com/cennznet/api-types.git#1.0.0"
   }
 }
 ```
