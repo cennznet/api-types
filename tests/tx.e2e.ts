@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import CENNZnetTypes from '@cennznet/api-types/injects';
-import {ApiPromise, Keyring, WsProvider} from '@polkadot/api';
+import CENNZnetTypes from '../src/interfaces/injects';
+import {ApiPromise, WsProvider} from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types';
 import {cryptoWaitReady} from '@polkadot/util-crypto';
+import * as balances from '../src/balances';
+import Keyring from "@polkadot/keyring";
+
+import {Balance} from "@polkadot/types/interfaces";
+import BN from 'bignumber.js';
 
 describe('e2e transactions', () => {
   let api: ApiPromise;
@@ -27,12 +32,15 @@ describe('e2e transactions', () => {
     const keyring = new Keyring({ type: 'sr25519' });
     alice = keyring.addFromUri('//Alice');
     bob = keyring.addFromUri('//Bob');
+    const derives = { balances };
+
     api = await ApiPromise.create({
       provider: new WsProvider('ws://localhost:9944'),
       types: {
         ...CENNZnetTypes,
       },
-      registry
+      derives,
+      registry,
     });
     // compatibility patch, don't use upstream composite account
     api.query.system.account = api.query.system.accountNonce;
@@ -45,29 +53,15 @@ describe('e2e transactions', () => {
 
   describe('Send extrinsics', () => {
 
-    it('does a GA transfer with keypair via send', async done => {
-      const nonce = await api.query.system.accountNonce(alice.address);
-      const tx = api.tx.genericAsset.transfer(16001, bob.address, 123).sign(alice, {nonce});
-      await tx.send(async ({events, status}) => {
-        if (status.isFinalized) {
-          expect(events[0].event.method).toEqual('Transferred');
-          expect(events[0].event.section).toEqual('genericAsset');
-          done();
-        }
-      });
-    });
-
     it('does a GA transfer with keypair via signAndSend', async done => {
-      await api.tx.genericAsset.transfer(16001, bob.address, 123).signAndSend(alice, async ({events, status}) => {
-          if (status.isFinalized) {
-            expect(events[0].event.method).toEqual('Transferred');
-            expect(events[0].event.section).toEqual('genericAsset');
-            done();
-          }
-      });
+      const nonce = await api.query.system.accountNonce(alice.address);
+      const balanceBefore = await api.query.genericAsset.freeBalance(16000, bob.address);
+      const transferAmount = 4124;
+      await api.tx.genericAsset.transfer(16000, bob.address, transferAmount).signAndSend(alice, {nonce});
+      // Check the change in balance
+      await api.query.genericAsset.freeBalance(16000, bob.address, (balanceAfter: Balance) => {
+          (new BN(balanceAfter.toString()).toFixed() == new BN(balanceBefore.toString()).plus(transferAmount).toFixed()) ? done() : null
+        });
     });
-
   });
-
-
 });

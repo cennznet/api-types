@@ -7,17 +7,17 @@ import { Gas } from '@polkadot/types/interfaces/contracts';
 import { BalanceOf, BlockNumber, Moment, Percent, Permill } from '@polkadot/types/interfaces/runtime';
 import { SessionIndex } from '@polkadot/types/interfaces/session';
 import { EraIndex } from '@polkadot/types/interfaces/staking';
+import { ApiTypes } from '@polkadot/api/types';
 
-declare module '@polkadot/metadata/Decorated/consts/types' {
-  export interface Constants {
-    [index: string]: ModuleConstants;
+declare module '@polkadot/api/types/consts' {
+  export interface AugmentedConsts<ApiType> {
     babe: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * The number of **slots** that an epoch takes. We couple sessions to
        * epochs, i.e. we start a new session once the new epoch begins.
        **/
-      epochDuration: AugmentedConst<u64>;
+      epochDuration: u64 & AugmentedConst<ApiType>;
       /**
        * The expected average block time at which BABE should be creating
        * blocks. Since BABE is probabilistic it is not trivial to figure out
@@ -25,171 +25,177 @@ declare module '@polkadot/metadata/Decorated/consts/types' {
        * duration and the security parameter `c` (where `1 - c` represents
        * the probability of a slot being empty).
        **/
-      expectedBlockTime: AugmentedConst<Moment>;
+      expectedBlockTime: Moment & AugmentedConst<ApiType>;
     };
     contracts: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * The maximum amount of gas that could be expended per block. A reasonable
        * default value is 10_000_000.
        **/
-      blockGasLimit: AugmentedConst<Gas>;
+      blockGasLimit: Gas & AugmentedConst<ApiType>;
       /**
        * The base fee charged for calling into a contract. A reasonable default
        * value is 135.
        **/
-      callBaseFee: AugmentedConst<Gas>;
+      callBaseFee: Gas & AugmentedConst<ApiType>;
       /**
        * The fee required to instantiate a contract instance. A reasonable default value
        * is 21.
        **/
-      contractFee: AugmentedConst<BalanceOf>;
+      contractFee: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The fee required to create an account.
        **/
-      creationFee: AugmentedConst<BalanceOf>;
+      creationFee: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The base fee charged for instantiating a contract. A reasonable default value
        * is 175.
        **/
-      instantiateBaseFee: AugmentedConst<Gas>;
+      instantiateBaseFee: Gas & AugmentedConst<ApiType>;
       /**
        * The maximum nesting level of a call/instantiate stack. A reasonable default
        * value is 100.
        **/
-      maxDepth: AugmentedConst<u32>;
+      maxDepth: u32 & AugmentedConst<ApiType>;
       /**
        * The maximum size of a storage value in bytes. A reasonable default is 16 KiB.
        **/
-      maxValueSize: AugmentedConst<u32>;
+      maxValueSize: u32 & AugmentedConst<ApiType>;
       /**
        * Price of a byte of storage per one block interval. Should be greater than 0.
        **/
-      rentByteFee: AugmentedConst<BalanceOf>;
+      rentByteFee: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The amount of funds a contract should deposit in order to offset
        * the cost of one byte.
+       * 
        * Let's suppose the deposit is 1,000 BU (balance units)/byte and the rent is 1 BU/byte/day,
        * then a contract with 1,000,000 BU that uses 1,000 bytes of storage would pay no rent.
        * But if the balance reduced to 500,000 BU and the storage stayed the same at 1,000,
        * then it would pay 500 BU/day.
        **/
-      rentDepositOffset: AugmentedConst<BalanceOf>;
+      rentDepositOffset: BalanceOf & AugmentedConst<ApiType>;
       /**
        * Number of block delay an extrinsic claim surcharge has.
+       * 
        * When claim surcharge is called by an extrinsic the rent is checked
        * for current_block - delay
        **/
-      signedClaimHandicap: AugmentedConst<BlockNumber>;
+      signedClaimHandicap: BlockNumber & AugmentedConst<ApiType>;
       /**
        * Size of a contract at the time of instantiation. This is a simple way to ensure that
        * empty contracts eventually gets deleted.
        **/
-      storageSizeOffset: AugmentedConst<u32>;
+      storageSizeOffset: u32 & AugmentedConst<ApiType>;
       /**
        * Reward that is received by the party whose touch has led
        * to removal of a contract.
        **/
-      surchargeReward: AugmentedConst<BalanceOf>;
+      surchargeReward: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The minimum amount required to generate a tombstone.
        **/
-      tombstoneDeposit: AugmentedConst<BalanceOf>;
+      tombstoneDeposit: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The fee to be paid for making a transaction; the base.
        **/
-      transactionBaseFee: AugmentedConst<BalanceOf>;
+      transactionBaseFee: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The fee to be paid for making a transaction; the per-byte portion.
        **/
-      transactionByteFee: AugmentedConst<BalanceOf>;
+      transactionByteFee: BalanceOf & AugmentedConst<ApiType>;
     };
     elections: {
-      [index: string]: AugmentedConst<object & Codec>;
-      candidacyBond: AugmentedConst<BalanceOf>;
-      desiredMembers: AugmentedConst<u32>;
-      desiredRunnersUp: AugmentedConst<u32>;
-      termDuration: AugmentedConst<BlockNumber>;
-      votingBond: AugmentedConst<BalanceOf>;
+      [key: string]: Codec;
+      candidacyBond: BalanceOf & AugmentedConst<ApiType>;
+      desiredMembers: u32 & AugmentedConst<ApiType>;
+      desiredRunnersUp: u32 & AugmentedConst<ApiType>;
+      termDuration: BlockNumber & AugmentedConst<ApiType>;
+      votingBond: BalanceOf & AugmentedConst<ApiType>;
     };
     finalityTracker: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * The delay after which point things become suspicious. Default is 1000.
        **/
-      reportLatency: AugmentedConst<BlockNumber>;
+      reportLatency: BlockNumber & AugmentedConst<ApiType>;
       /**
        * The number of recent samples to keep from this chain. Default is 101.
        **/
-      windowSize: AugmentedConst<BlockNumber>;
+      windowSize: BlockNumber & AugmentedConst<ApiType>;
     };
     staking: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * Number of eras that staked funds must remain bonded for.
        **/
-      bondingDuration: AugmentedConst<EraIndex>;
+      bondingDuration: EraIndex & AugmentedConst<ApiType>;
       /**
        * Number of sessions per era.
        **/
-      sessionsPerEra: AugmentedConst<SessionIndex>;
+      sessionsPerEra: SessionIndex & AugmentedConst<ApiType>;
     };
     timestamp: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * The minimum period between blocks. Beware that this is different to the *expected* period
        * that the block production apparatus provides. Your chosen consensus system will generally
        * work with this to determine a sensible block time. e.g. For Aura, it will be double this
        * period on default settings.
        **/
-      minimumPeriod: AugmentedConst<Moment>;
+      minimumPeriod: Moment & AugmentedConst<ApiType>;
     };
     transactionPayment: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * The fee to be paid for making a transaction; the base.
        **/
-      transactionBaseFee: AugmentedConst<BalanceOf>;
+      transactionBaseFee: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The fee to be paid for making a transaction; the per-byte portion.
        **/
-      transactionByteFee: AugmentedConst<BalanceOf>;
+      transactionByteFee: BalanceOf & AugmentedConst<ApiType>;
     };
     treasury: {
-      [index: string]: AugmentedConst<object & Codec>;
+      [key: string]: Codec;
       /**
        * Percentage of spare funds (if any) that are burnt per spend period.
        **/
-      burn: AugmentedConst<Permill>;
+      burn: Permill & AugmentedConst<ApiType>;
       /**
        * Fraction of a proposal's value that should be bonded in order to place the proposal.
        * An accepted proposal gets these back. A rejected proposal does not.
        **/
-      proposalBond: AugmentedConst<Permill>;
+      proposalBond: Permill & AugmentedConst<ApiType>;
       /**
        * Minimum amount of funds that should be placed in a deposit for making a proposal.
        **/
-      proposalBondMinimum: AugmentedConst<BalanceOf>;
+      proposalBondMinimum: BalanceOf & AugmentedConst<ApiType>;
       /**
        * Period between successive spends.
        **/
-      spendPeriod: AugmentedConst<BlockNumber>;
+      spendPeriod: BlockNumber & AugmentedConst<ApiType>;
       /**
        * The period for which a tip remains open after is has achieved threshold tippers.
        **/
-      tipCountdown: AugmentedConst<BlockNumber>;
+      tipCountdown: BlockNumber & AugmentedConst<ApiType>;
       /**
        * The amount of the final tip which goes to the original reporter of the tip.
        **/
-      tipFindersFee: AugmentedConst<Percent>;
+      tipFindersFee: Percent & AugmentedConst<ApiType>;
       /**
        * The amount held on deposit for placing a tip report.
        **/
-      tipReportDepositBase: AugmentedConst<BalanceOf>;
+      tipReportDepositBase: BalanceOf & AugmentedConst<ApiType>;
       /**
        * The amount held on deposit per byte within the tip report reason.
        **/
-      tipReportDepositPerByte: AugmentedConst<BalanceOf>;
+      tipReportDepositPerByte: BalanceOf & AugmentedConst<ApiType>;
     };
+  }
+
+  export interface QueryableConsts<ApiType extends ApiTypes> extends AugmentedConsts<ApiType> {
+    [key: string]: QueryableModuleConsts;
   }
 }
