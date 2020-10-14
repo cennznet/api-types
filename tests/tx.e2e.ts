@@ -19,9 +19,6 @@ import {cryptoWaitReady} from '@polkadot/util-crypto';
 import * as balances from '../src/balances';
 import Keyring from "@polkadot/keyring";
 
-import {Balance} from "@polkadot/types/interfaces";
-import BN from 'bignumber.js';
-
 describe('e2e transactions', () => {
   let api: ApiPromise;
   let alice, bob;
