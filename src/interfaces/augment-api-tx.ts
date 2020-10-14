@@ -4,6 +4,7 @@
 import { AnyNumber, ITuple } from '@polkadot/types/types';
 import { Compact, Option, U8aFixed, Vec } from '@polkadot/types/codec';
 import { Bytes, Data, bool, u16, u32, u64 } from '@polkadot/types/primitive';
+import { FeeRate } from '@cennznet/api-types/interfaces/cennzx';
 import { AcceptPayload, DeviceId, Invite, Meta, PreKeyBundle, VaultKey, VaultValue } from '@cennznet/api-types/interfaces/sylo';
 import { BabeEquivocationProof } from '@polkadot/types/interfaces/babe';
 import { ProposalIndex } from '@polkadot/types/interfaces/collective';
@@ -15,6 +16,7 @@ import { Heartbeat } from '@polkadot/types/interfaces/imOnline';
 import { AccountId, AccountIndex, Address, AssetId, Balance, BalanceOf, BlockNumber, Call, ChangesTrieConfiguration, H256, Hash, Header, KeyValue, LookupSource, Moment, OpaqueCall, Perbill, Weight } from '@polkadot/types/interfaces/runtime';
 import { Period, Priority } from '@polkadot/types/interfaces/scheduler';
 import { Keys } from '@polkadot/types/interfaces/session';
+import { EraIndex, RewardDestination, ValidatorPrefs } from '@polkadot/types/interfaces/staking';
 import { Key } from '@polkadot/types/interfaces/system';
 import { BountyIndex } from '@polkadot/types/interfaces/treasury';
 import { Timepoint } from '@polkadot/types/interfaces/utility';
@@ -49,6 +51,55 @@ declare module '@polkadot/api/types/submittable' {
        * reporter.
        **/
       reportEquivocationUnsigned: AugmentedSubmittable<(equivocationProof: BabeEquivocationProof | { offender?: any; slotNumber?: any; firstHeader?: any; secondHeader?: any } | string | Uint8Array, keyOwnerProof: KeyOwnerProof | { session?: any; trieNodes?: any; validatorCount?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+    };
+    cennzx: {
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+      /**
+       * Deposit core asset and trade asset at current ratio to mint liquidity
+       * Returns amount of liquidity minted.
+       * 
+       * `origin`
+       * `asset_id` - The trade asset ID
+       * `min_liquidity` - The minimum liquidity to add
+       * `asset_amount` - Amount of trade asset to add
+       * `core_amount` - Amount of core asset to add
+       **/
+      addLiquidity: AugmentedSubmittable<(assetId: Compact<AssetId> | AnyNumber | Uint8Array, minLiquidity: Compact<Balance> | AnyNumber | Uint8Array, maxAssetAmount: Compact<Balance> | AnyNumber | Uint8Array, coreAmount: Compact<Balance> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Buy `asset_to_buy` with `asset_to_sell`.
+       * Caller specifies an exact `buy_amount` and a `maximum_sell` amount to pay.
+       * 
+       * `recipient` - Account to receive assets, defaults to `origin` if None
+       * `asset_to_sell` - asset ID to sell
+       * `asset_to_buy` - asset ID to buy
+       * `buy_amount` - The amount of `asset_to_buy` to receive
+       * `maximum_sell` - Maximum `asset_to_sell` caller should pay
+       **/
+      buyAsset: AugmentedSubmittable<(recipient: Option<AccountId> | null | object | string | Uint8Array, assetToSell: Compact<AssetId> | AnyNumber | Uint8Array, assetToBuy: Compact<AssetId> | AnyNumber | Uint8Array, buyAmount: Compact<Balance> | AnyNumber | Uint8Array, maximumSell: Compact<Balance> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Burn exchange assets to withdraw core asset and trade asset at current ratio
+       * 
+       * `asset_id` - The trade asset ID
+       * `liquidity_to_withdraw` - Amount of user's liquidity to withdraw
+       * `min_asset_withdraw` - The minimum trade asset withdrawn
+       * `min_core_withdraw` -  The minimum core asset withdrawn
+       **/
+      removeLiquidity: AugmentedSubmittable<(assetId: Compact<AssetId> | AnyNumber | Uint8Array, liquidityToWithdraw: Compact<Balance> | AnyNumber | Uint8Array, minAssetWithdraw: Compact<Balance> | AnyNumber | Uint8Array, minCoreWithdraw: Compact<Balance> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Sell `asset_to_sell` for `asset_to_buy`.
+       * Caller specifies an exact `sell_amount` and a `minimum_buy` amount to receive.
+       * 
+       * `recipient` - Account to receive assets, defaults to `origin` if None
+       * `asset_to_sell` - asset ID to sell
+       * `asset_to_buy` - asset ID to buy
+       * `sell_amount` - The amount of `asset_to_sell` the caller should pay
+       * `minimum_buy` - The minimum `asset_to_buy` to receive
+       **/
+      sellAsset: AugmentedSubmittable<(recipient: Option<AccountId> | null | object | string | Uint8Array, assetToSell: Compact<AssetId> | AnyNumber | Uint8Array, assetToBuy: Compact<AssetId> | AnyNumber | Uint8Array, sellAmount: Compact<Balance> | AnyNumber | Uint8Array, minimumBuy: Compact<Balance> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Set the spot exchange wide fee rate (root only)
+       **/
+      setFeeRate: AugmentedSubmittable<(newFeeRate: FeeRate | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
     };
     finalityTracker: {
       [key: string]: SubmittableExtrinsicFunction<ApiType>;
@@ -690,6 +741,236 @@ declare module '@polkadot/api/types/submittable' {
        * # </weight>
        **/
       setKeys: AugmentedSubmittable<(keys: Keys, proof: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+    };
+    staking: {
+      [key: string]: SubmittableExtrinsicFunction<ApiType>;
+      /**
+       * Take the origin account as a stash and lock up `value` of its balance. `controller` will
+       * be the account that controls it.
+       * 
+       * `value` must be more than the `minimum_bond` specified in genesis config.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the stash account.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Moderate complexity.
+       * - O(1).
+       * - Three extra DB entries.
+       * 
+       * NOTE: Two of the storage writes (`Self::bonded`, `Self::payee`) are _never_ cleaned unless
+       * the `origin` falls below minimum bond and is removed lazliy in `withdraw_unbonded`.
+       * # </weight>
+       **/
+      bond: AugmentedSubmittable<(controller: AccountId | string | Uint8Array, value: Compact<BalanceOf> | AnyNumber | Uint8Array, payee: RewardDestination | { Staked: any } | { Stash: any } | { Controller: any } | { Account: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Add some extra amount that have appeared in the stash `free_balance` into the balance up
+       * for staking.
+       * 
+       * Use this if there are additional funds in your stash account that you wish to bond.
+       * Unlike [`bond`] or [`unbond`] this function does not impose any limitation on the amount
+       * that can be added.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the stash, not the controller.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Insignificant complexity.
+       * - O(1).
+       * - One DB entry.
+       * # </weight>
+       **/
+      bondExtra: AugmentedSubmittable<(maxAdditional: Compact<BalanceOf> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Cancel enactment of a deferred slash. Can be called by root origin
+       * passing the era and indices of the slashes for that era to kill.
+       * 
+       * # <weight>
+       * - One storage write.
+       * # </weight>
+       **/
+      cancelDeferredSlash: AugmentedSubmittable<(era: EraIndex | AnyNumber | Uint8Array, slashIndices: Vec<u32> | (u32 | AnyNumber | Uint8Array)[]) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Declare no desire to either validate or nominate.
+       * 
+       * Effects will be felt at the beginning of the next era.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Insignificant complexity.
+       * - Contains one read.
+       * - Writes are limited to the `origin` account key.
+       * # </weight>
+       **/
+      chill: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Force there to be a new era at the end of the next session. After this, it will be
+       * reset to normal (non-forced) behaviour.
+       * 
+       * # <weight>
+       * - No arguments.
+       * # </weight>
+       **/
+      forceNewEra: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Force there to be a new era at the end of sessions indefinitely.
+       * 
+       * # <weight>
+       * - One storage write
+       * # </weight>
+       **/
+      forceNewEraAlways: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Force there to be no new eras indefinitely.
+       * 
+       * # <weight>
+       * - No arguments.
+       * # </weight>
+       **/
+      forceNoEras: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Force a current staker to become completely unstaked, immediately.
+       **/
+      forceUnstake: AugmentedSubmittable<(stash: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Declare the desire to nominate `targets` for the origin controller.
+       * 
+       * Effects will be felt at the beginning of the next era.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * # <weight>
+       * - The transaction's complexity is proportional to the size of `targets`,
+       * which is capped at `MAX_NOMINATIONS`.
+       * - Both the reads and writes follow a similar pattern.
+       * # </weight>
+       **/
+      nominate: AugmentedSubmittable<(targets: Vec<AccountId> | (AccountId | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Remove all data structure concerning a staker/stash once its balance is zero.
+       * This is essentially equivalent to `withdraw_unbonded` except it can be called by anyone
+       * and the target `stash` must have no funds left.
+       * 
+       * This can be called from any origin.
+       * 
+       * - `stash`: The stash account to reap. Its balance must be zero.
+       * 
+       * # <weight>
+       * Complexity: O(S) where S is the number of slashing spans on the account.
+       * DB Weight:
+       * - Reads: Stash Account, Bonded, Slashing Spans, Locks
+       * - Writes: Bonded, Slashing Spans (if S > 0), Ledger, Payee, Validators, Nominators, Stash Account, Locks
+       * - Writes Each: SpanSlash * S
+       * # </weight>
+       **/
+      reapStash: AugmentedSubmittable<(stash: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Rebond a portion of the stash scheduled to be unlocked.
+       * 
+       * # <weight>
+       * - Time complexity: O(1). Bounded by `MAX_UNLOCKING_CHUNKS`.
+       * - Storage changes: Can't increase storage, only decrease it.
+       * # </weight>
+       **/
+      rebond: AugmentedSubmittable<(value: Compact<BalanceOf> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * (Re-)set the controller of a stash.
+       * 
+       * Effects will be felt at the beginning of the next era.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the stash, not the controller.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Insignificant complexity.
+       * - Contains a limited number of reads.
+       * - Writes are limited to the `origin` account key.
+       * # </weight>
+       **/
+      setController: AugmentedSubmittable<(controller: AccountId | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Set the validators who cannot be slashed (if any).
+       **/
+      setInvulnerables: AugmentedSubmittable<(validators: Vec<AccountId> | (AccountId | string | Uint8Array)[]) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Set the minimum bond amount.
+       **/
+      setMinimumBond: AugmentedSubmittable<(value: BalanceOf | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * (Re-)set the payment target for a controller.
+       * 
+       * Effects will be felt at the beginning of the next era.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Insignificant complexity.
+       * - Contains a limited number of reads.
+       * - Writes are limited to the `origin` account key.
+       * # </weight>
+       **/
+      setPayee: AugmentedSubmittable<(payee: RewardDestination | { Staked: any } | { Stash: any } | { Controller: any } | { Account: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * The ideal number of validators.
+       **/
+      setValidatorCount: AugmentedSubmittable<(updated: Compact<u32> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Schedule a portion of the stash to be unlocked ready for transfer out after the bond
+       * period ends. If this leaves an amount actively bonded less than
+       * T::Currency::minimum_balance(), then it is increased to the full amount.
+       * 
+       * Once the unlock period is done, you can call `withdraw_unbonded` to actually move
+       * the funds out of management ready for transfer.
+       * 
+       * No more than a limited number of unlocking chunks (see `MAX_UNLOCKING_CHUNKS`)
+       * can co-exists at the same time. In that case, [`Call::withdraw_unbonded`] need
+       * to be called first to remove some of the chunks (if possible).
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * See also [`Call::withdraw_unbonded`].
+       * 
+       * # <weight>
+       * - Independent of the arguments. Limited but potentially exploitable complexity.
+       * - Contains a limited number of reads.
+       * - Each call (requires the remainder of the bonded balance to be above `minimum_balance`)
+       * will cause a new entry to be inserted into a vector (`Ledger.unlocking`) kept in storage.
+       * The only way to clean the aforementioned storage item is also user-controlled via `withdraw_unbonded`.
+       * - One DB entry.
+       * </weight>
+       **/
+      unbond: AugmentedSubmittable<(value: Compact<BalanceOf> | AnyNumber | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Declare the desire to validate for the origin controller.
+       * 
+       * Effects will be felt at the beginning of the next era.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * # <weight>
+       * - Independent of the arguments. Insignificant complexity.
+       * - Contains a limited number of reads.
+       * - Writes are limited to the `origin` account key.
+       * # </weight>
+       **/
+      validate: AugmentedSubmittable<(prefs: ValidatorPrefs | { commission?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
+      /**
+       * Remove any unlocked chunks from the `unlocking` queue from our management.
+       * 
+       * This essentially frees up that balance to be used by the stash account to do
+       * whatever it wants.
+       * 
+       * The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+       * 
+       * See also [`Call::unbond`].
+       * 
+       * # <weight>
+       * - Could be dependent on the `origin` argument and how much `unlocking` chunks exist.
+       * It implies `consolidate_unlocked` which loops over `Ledger.unlocking`, which is
+       * indirectly user-controlled. See [`unbond`] for more detail.
+       * - Contains a limited number of reads, yet the size of which could be large based on `ledger`.
+       * - Writes are limited to the `origin` account key.
+       * # </weight>
+       **/
+      withdrawUnbonded: AugmentedSubmittable<() => SubmittableExtrinsic<ApiType>>;
     };
     sudo: {
       [key: string]: SubmittableExtrinsicFunction<ApiType>;

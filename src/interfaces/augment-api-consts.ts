@@ -5,6 +5,8 @@ import { Codec } from '@polkadot/types/types';
 import { Vec } from '@polkadot/types/codec';
 import { u16, u32, u64 } from '@polkadot/types/primitive';
 import { BalanceOf, BlockNumber, ModuleId, Moment, Percent, Permill, RuntimeDbWeight, Weight } from '@polkadot/types/interfaces/runtime';
+import { SessionIndex } from '@polkadot/types/interfaces/session';
+import { EraIndex } from '@polkadot/types/interfaces/staking';
 import { WeightToFeeCoefficient } from '@polkadot/types/interfaces/support';
 import { ApiTypes } from '@polkadot/api/types';
 
@@ -83,6 +85,17 @@ declare module '@polkadot/api/types/consts' {
        * The maximum amount of signatories allowed for a given multisig.
        **/
       maxSignatories: u16 & AugmentedConst<ApiType>;
+    };
+    staking: {
+      [key: string]: Codec;
+      /**
+       * Number of eras that staked funds must remain bonded for.
+       **/
+      bondingDuration: EraIndex & AugmentedConst<ApiType>;
+      /**
+       * Number of sessions per era.
+       **/
+      sessionsPerEra: SessionIndex & AugmentedConst<ApiType>;
     };
     system: {
       [key: string]: Codec;

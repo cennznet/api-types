@@ -4,6 +4,7 @@
 import { AnyNumber, ITuple, Observable } from '@polkadot/types/types';
 import { Option, U8aFixed, Vec } from '@polkadot/types/codec';
 import { Bytes, Data, bool, u32, u64 } from '@polkadot/types/primitive';
+import { ExchangeKey, FeeRate } from '@cennznet/api-types/interfaces/cennzx';
 import { DeviceId, Group, PreKeyBundle, Response, VaultKey, VaultValue } from '@cennznet/api-types/interfaces/sylo';
 import { UncleEntryItem } from '@polkadot/types/interfaces/authorship';
 import { BabeAuthorityWeight, MaybeRandomness, NextConfigDescriptor, Randomness } from '@polkadot/types/interfaces/babe';
@@ -15,9 +16,10 @@ import { SetId, StoredPendingChange, StoredState } from '@polkadot/types/interfa
 import { RegistrarInfo, Registration } from '@polkadot/types/interfaces/identity';
 import { AuthIndex } from '@polkadot/types/interfaces/imOnline';
 import { DeferredOffenceOf, Kind, OffenceDetails, OpaqueTimeSlot, ReportIdOf } from '@polkadot/types/interfaces/offences';
-import { AccountId, AssetId, Balance, BalanceOf, BlockNumber, ExtrinsicsWeight, Hash, KeyTypeId, Moment, OpaqueCall, Releases, ValidatorId } from '@polkadot/types/interfaces/runtime';
+import { AccountId, AssetId, Balance, BalanceOf, BlockNumber, ExtrinsicsWeight, Hash, KeyTypeId, Moment, OpaqueCall, Perbill, Releases, ValidatorId } from '@polkadot/types/interfaces/runtime';
 import { Scheduled, TaskAddress } from '@polkadot/types/interfaces/scheduler';
 import { Keys, SessionIndex } from '@polkadot/types/interfaces/session';
+import { EraIndex, EraPoints, Exposure, Forcing, MomentOf, Nominations, RewardDestination, SlashingSpans, SpanIndex, SpanRecord, StakingLedger, UnappliedSlash, ValidatorPrefs } from '@polkadot/types/interfaces/staking';
 import { AccountInfo, DigestOf, EventIndex, EventRecord, LastRuntimeUpgradeInfo, Phase } from '@polkadot/types/interfaces/system';
 import { Bounty, BountyIndex, OpenTip, TreasuryProposal } from '@polkadot/types/interfaces/treasury';
 import { Multiplier } from '@polkadot/types/interfaces/txpayment';
@@ -110,6 +112,27 @@ declare module '@polkadot/api/types/storage' {
        * TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay.
        **/
       underConstruction: AugmentedQuery<ApiType, (arg: u32 | AnyNumber | Uint8Array) => Observable<Vec<Randomness>>> & QueryableStorageEntry<ApiType>;
+    };
+    cennzx: {
+      [key: string]: QueryableStorageEntry<ApiType>;
+      /**
+       * Asset Id of the core liquidity asset
+       **/
+      coreAssetId: AugmentedQuery<ApiType, () => Observable<AssetId>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Default trading fee rate
+       **/
+      defaultFeeRate: AugmentedQuery<ApiType, () => Observable<FeeRate>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Liquidity holdings of a user in an exchange pool.
+       * Key: `(core_asset_id, trade_asset_id), account_id`
+       **/
+      liquidityBalance: AugmentedQueryDoubleMap<ApiType, (key1: ExchangeKey, key2: AccountId | string | Uint8Array) => Observable<Balance>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Total liquidity holdings of all investors in an exchange.
+       * ie/ total_liquidity(exchange) == sum(liquidity_balance(exchange, user)) at all times
+       **/
+      totalLiquidity: AugmentedQuery<ApiType, (arg: ExchangeKey) => Observable<Balance>> & QueryableStorageEntry<ApiType>;
     };
     finalityTracker: {
       [key: string]: QueryableStorageEntry<ApiType>;
@@ -357,6 +380,137 @@ declare module '@polkadot/api/types/storage' {
        * The current set of validators.
        **/
       validators: AugmentedQuery<ApiType, () => Observable<Vec<ValidatorId>>> & QueryableStorageEntry<ApiType>;
+    };
+    staking: {
+      [key: string]: QueryableStorageEntry<ApiType>;
+      /**
+       * Map from all locked "stash" accounts to the controller account.
+       **/
+      bonded: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<Option<AccountId>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * A mapping from still-bonded eras to the first session index of that era.
+       **/
+      bondedEras: AugmentedQuery<ApiType, () => Observable<Vec<ITuple<[EraIndex, SessionIndex]>>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The amount of currency given to reporters of a slash event which was
+       * canceled by extraordinary circumstances (e.g. governance).
+       **/
+      canceledSlashPayout: AugmentedQuery<ApiType, () => Observable<BalanceOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The currently elected validator set keyed by stash account ID.
+       **/
+      currentElected: AugmentedQuery<ApiType, () => Observable<Vec<AccountId>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The current era index.
+       **/
+      currentEra: AugmentedQuery<ApiType, () => Observable<EraIndex>> & QueryableStorageEntry<ApiType>;
+      currentEraDuration: AugmentedQuery<ApiType, () => Observable<MomentOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Total transaction payment rewards for elected validators
+       **/
+      currentEraFeeRewards: AugmentedQuery<ApiType, () => Observable<RewardBalanceOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Rewards for the current era. Using indices of current elected set.
+       **/
+      currentEraPointsEarned: AugmentedQuery<ApiType, () => Observable<EraPoints>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The start of the current era.
+       **/
+      currentEraStart: AugmentedQuery<ApiType, () => Observable<MomentOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The session index at which the current era started.
+       **/
+      currentEraStartSessionIndex: AugmentedQuery<ApiType, () => Observable<SessionIndex>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The earliest era for which we have a pending, unapplied slash.
+       **/
+      earliestUnappliedSlash: AugmentedQuery<ApiType, () => Observable<Option<EraIndex>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * True if the next session change will be a new era regardless of index.
+       **/
+      forceEra: AugmentedQuery<ApiType, () => Observable<Forcing>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
+       * easy to initialize and the performance hit is minimal (we expect no more than four
+       * invulnerables) and restricted to testnets.
+       **/
+      invulnerables: AugmentedQuery<ApiType, () => Observable<Vec<AccountId>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Map from all (unlocked) "controller" accounts to the info regarding the staking.
+       **/
+      ledger: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<Option<StakingLedger>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Minimum amount to bond.
+       **/
+      minimumBond: AugmentedQuery<ApiType, () => Observable<BalanceOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Minimum number of staking participants before emergency conditions are imposed.
+       **/
+      minimumValidatorCount: AugmentedQuery<ApiType, () => Observable<u32>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The map from nominator stash key to the set of stash keys of all validators to nominate.
+       * 
+       * NOTE: is private so that we can ensure upgraded before all typical accesses.
+       * Direct storage APIs can still bypass this protection.
+       **/
+      nominators: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<Option<Nominations>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * All slashing events on nominators, mapped by era to the highest slash value of the era.
+       **/
+      nominatorSlashInEra: AugmentedQueryDoubleMap<ApiType, (key1: EraIndex | AnyNumber | Uint8Array, key2: AccountId | string | Uint8Array) => Observable<Option<BalanceOf>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Where the reward payment should be made. Keyed by stash.
+       **/
+      payee: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<RewardDestination>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Slashing spans for stash accounts.
+       **/
+      slashingSpans: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<Option<SlashingSpans>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The percentage of the slash that is distributed to reporters.
+       * 
+       * The rest of the slashed value is handled by the `Slash`.
+       **/
+      slashRewardFraction: AugmentedQuery<ApiType, () => Observable<Perbill>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The amount of balance actively at stake for each validator slot, currently.
+       * 
+       * This is used to derive rewards and punishments.
+       **/
+      slotStake: AugmentedQuery<ApiType, () => Observable<BalanceOf>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Records information about the maximum slash of a stash within a slashing span,
+       * as well as how much reward has been paid out.
+       **/
+      spanSlash: AugmentedQuery<ApiType, (arg: ITuple<[AccountId, SpanIndex]> | [AccountId | string | Uint8Array, SpanIndex | AnyNumber | Uint8Array]) => Observable<SpanRecord>> & QueryableStorageEntry<ApiType>;
+      /**
+       * Nominators for a particular account that is in action right now. You can't iterate
+       * through validators here, but you can find them in the Session module.
+       * 
+       * This is keyed by the stash account.
+       **/
+      stakers: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<Exposure>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The version of storage for upgrade.
+       **/
+      storageVersion: AugmentedQuery<ApiType, () => Observable<u32>> & QueryableStorageEntry<ApiType>;
+      /**
+       * All unapplied slashes that are queued for later.
+       **/
+      unappliedSlashes: AugmentedQuery<ApiType, (arg: EraIndex | AnyNumber | Uint8Array) => Observable<Vec<UnappliedSlash>>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The ideal number of staking participants.
+       **/
+      validatorCount: AugmentedQuery<ApiType, () => Observable<u32>> & QueryableStorageEntry<ApiType>;
+      /**
+       * The map from (wannabe) validator stash key to the preferences of that validator.
+       **/
+      validators: AugmentedQuery<ApiType, (arg: AccountId | string | Uint8Array) => Observable<ValidatorPrefs>> & QueryableStorageEntry<ApiType>;
+      /**
+       * All slashing events on validators, mapped by era to the highest slash proportion
+       * and slash value of the era.
+       **/
+      validatorSlashInEra: AugmentedQueryDoubleMap<ApiType, (key1: EraIndex | AnyNumber | Uint8Array, key2: AccountId | string | Uint8Array) => Observable<Option<ITuple<[Perbill, BalanceOf]>>>> & QueryableStorageEntry<ApiType>;
     };
     sudo: {
       [key: string]: QueryableStorageEntry<ApiType>;
