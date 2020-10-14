@@ -7,7 +7,6 @@ import { AttestationTopic, AttestationValue } from '@cennznet/api-types/interfac
 import { ExchangeKey, FeeRate } from '@cennznet/api-types/interfaces/cennzx';
 import { RewardBalance } from '@cennznet/api-types/interfaces/staking';
 import { AcceptPayload, DeviceId, DeviceIdResponse, Group, Invite, Member, MemberRoles, Meta, PendingInvite, PreKeyBundle, PreKeyBundlesResponse, Response, VaultKey, VaultValue, WithdrawnPreKeyBundle } from '@cennznet/api-types/interfaces/sylo';
-import { Doughnut } from '@cennznet/api-types/interfaces/system';
 import { ChargeTransactionPayment, FeeExchange, FeeExchangeV1 } from '@cennznet/api-types/interfaces/transactionPayment';
 import { BlockAttestations, IncludedBlocks, MoreAttestations } from '@polkadot/types/interfaces/attestations';
 import { RawAuraPreDigest } from '@polkadot/types/interfaces/aura';
@@ -1437,9 +1436,6 @@ declare module '@polkadot/types/types/registry' {
     VaultValue: VaultValue;
     'Option<VaultValue>': Option<VaultValue>;
     'Vec<VaultValue>': Vec<VaultValue>;
-    Doughnut: Doughnut;
-    'Option<Doughnut>': Option<Doughnut>;
-    'Vec<Doughnut>': Vec<Doughnut>;
     FeeExchangeV1: FeeExchangeV1;
     'Option<FeeExchangeV1>': Option<FeeExchangeV1>;
     'Vec<FeeExchangeV1>': Vec<FeeExchangeV1>;

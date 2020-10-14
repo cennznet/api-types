@@ -1,34 +1,24 @@
-// Copyright 2017-2020 @polkadot/types authors & contributors & Centrality Investments Limited 2020
-// This software may be modified and distributed under the terms
-// of the Apache-2.0 license. See the LICENSE file for details.
+// Copyright 2019-2020 Centrality Investments Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
 import { Bytes, Compact, Option, Struct, u32 } from '@polkadot/types';
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
 import { sign } from '@polkadot/types/extrinsic/util';
-import { IKeyringPair, Registry } from '@polkadot/types/types';
+import {ExtrinsicPayloadValue, IKeyringPair, Registry} from '@polkadot/types/types';
 
-import { ExtrinsicPayloadValue } from '../types';
-import { ChargeTransactionPayment, Doughnut, Index } from  '../../types';
-
-
-// TODO: Load [[Extra]] from metadata e.g.:
-// ...registry.getSignedExtensionTypes(),
-// ...registry.getSignedExtensionExtra()
-
-// The extended extrinsic payload types
-export const Extra: Record<string, InterfaceTypes> = {
-  method: 'Bytes',
-  doughnut: 'Option<Doughnut>',
-  era: 'ExtrinsicEra',
-  nonce: 'Compact<Index>',
-  transactionPayment: 'ChargeTransactionPayment',
-  // These fields are signed here as part of the extrinsic signature but are NOT encoded in
-  // the final extrinsic payload itself.
-  // The CENNZnet node will populate these fields from on-chain data and check the signature compares
-  specVersion: 'u32',
-  genesisHash: 'Hash',
-  blockHash: 'Hash',
-};
+import { ChargeTransactionPayment, Index } from  '../../types';
+import {defaultExtensions, expandExtensionTypes} from "../signedExtensions";
 
 /**
  * @name CENNZnetExtrinsicPayloadV1
@@ -40,7 +30,8 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
   constructor (registry: Registry, value?: ExtrinsicPayloadValue | Uint8Array | string) {
     super(registry, {
       method: 'Bytes',
-      ...Extra
+      ...expandExtensionTypes(defaultExtensions as string[], 'types'),
+      ...expandExtensionTypes(defaultExtensions as string[], 'extra'),
     }, value);
   }
 
@@ -94,17 +85,17 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
   }
 
   /**
+   * @description The transactionVersion for this signature
+   */
+  public get transactionVersion (): u32 {
+    return this.get('transactionVersion') as u32;
+  }
+
+  /**
    * @description The transaction fee metadata e.g tip, fee exchange
    */
   get transactionPayment(): ChargeTransactionPayment {
     return this.get('transactionPayment') as ChargeTransactionPayment;
-  }
-
-  /**
-   * @description The [[Doughnut]]
-   */
-  get doughnut(): Option<Doughnut> {
-    return this.get('doughnut') as Option<Doughnut>;
   }
   
   /**
