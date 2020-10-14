@@ -42,8 +42,6 @@ function findUnknownExtensions (extensions: string[]): string[] {
 }
 
 function expandExtensionTypes (extensions: string[], type: keyof ExtInfo): ExtTypes {
-    // console.log('extensions::',extensions);
-    // console.log('All extensions::', JSON.stringify(allExtensions));
     return extensions
         .map((key): ExtInfo => allExtensions[key])
         .filter((info): boolean => !!info)
