@@ -14,7 +14,7 @@ export default {
     ChargeTransactionPayment: {
         extra: {},
         types: {
-            transactionPayment: "ChargeTransactionPayment"
+            transactionPayment: 'ChargeTransactionPayment'
         }
     },
     CheckEra: CheckMortality,
