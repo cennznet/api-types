@@ -1,4 +1,4 @@
-// Copyright 2017-2020 @polkadot/types authors & contributors & Centrality Investments Limited 2020
+// Copyright 2019-2020 Centrality Investments Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
