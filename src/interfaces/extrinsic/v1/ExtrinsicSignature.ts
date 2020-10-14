@@ -2,15 +2,32 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
-import { Compact, Option, Struct, createType } from '@polkadot/types';
-import { IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
+import {
+  Address,
+  Balance,
+  Call,
+  EcdsaSignature,
+  Ed25519Signature,
+  ExtrinsicEra,
+  Index,
+  MultiSignature,
+  Sr25519Signature
+} from '@polkadot/types/interfaces';
+import { Compact, Struct} from '@polkadot/types';
+import {
+  ExtrinsicPayloadValue,
+  IExtrinsicSignature,
+  IKeyringPair,
+  Registry,
+  SignatureOptions
+} from '@polkadot/types/types';
 import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/extrinsic/constants';
 import { u8aConcat } from '@polkadot/util';
 
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
-import { ExtrinsicPayloadValue, ExtrinsicSignatureOptions, SignatureOptions } from '../types';
-import { ChargeTransactionPayment, Doughnut, Index } from '../../types';
+import {ExtrinsicSignatureOptions} from "@polkadot/types/extrinsic/types";
+import {expandExtensionTypes, defaultExtensions} from "../signedExtensions";
+import {ChargeTransactionPayment} from "../../transactionPayment";
 
 /**
  * @name CENNZnetExtrinsicSignatureV1
@@ -22,14 +39,9 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
     super(registry, {
       signer: 'Address',
       signature: 'MultiSignature',
-      // TODO: Load this dynamically like so:
-      // ...registry.getSignedExtensionTypes(),
-      // ...registry.getSignedExtensionExtra()
-      doughnut: 'Option<Doughnut>',
-      era: 'ExtrinsicEra',
-      nonce: 'Compact<Index>',
-      transactionPayment: 'ChargeTransactionPayment',
-    }, CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned));
+      ...expandExtensionTypes(defaultExtensions as string[], 'types'),
+
+      }, CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned));
   }
 
   /** @internal */
@@ -110,20 +122,11 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
     return this.get('transactionPayment') as ChargeTransactionPayment;
   }
 
-  /**
-   * @description The [[Doughnut]]
-   */
-  get doughnut(): Option<Doughnut> {
-    return this.get('doughnut') as Option<Doughnut>;
-  }
-  
-
-  protected injectSignature (signer: Address, signature: MultiSignature, { era, nonce, doughnut, transactionPayment }: ExtrinsicPayloadV4): IExtrinsicSignature {
+  protected injectSignature (signer: Address, signature: MultiSignature, { era, nonce, transactionPayment }: ExtrinsicPayloadV4): IExtrinsicSignature {
     this.set('era', era);
     this.set('nonce', nonce);
     this.set('signer', signer);
     this.set('signature', signature);
-    this.set('doughnut', doughnut);
     this.set('transactionPayment', transactionPayment);
 
     return this;
@@ -134,8 +137,8 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    */
   public addSignature (signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValue | Uint8Array | string): IExtrinsicSignature {
     return this.injectSignature(
-      createType(this.registry, 'Address', signer),
-      createType(this.registry, 'MultiSignature', signature),
+      this.registry.createType('Address', signer),
+      this.registry.createType( 'MultiSignature', signature),
       new ExtrinsicPayloadV4(this.registry, payload)
     );
   }
@@ -143,11 +146,10 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
   /**
    * @description Creates a payload from the supplied options
    */
-  public createPayload (method: Call, { blockHash, era, genesisHash, nonce, runtimeVersion: { specVersion }, tip, doughnut, transactionPayment }: SignatureOptions): ExtrinsicPayloadV4 {
-    return new ExtrinsicPayloadV4(this.registry, {
+  public createPayload (method: Call, { blockHash, era, genesisHash, nonce, runtimeVersion: { specVersion, transactionVersion } }: SignatureOptions): ExtrinsicPayloadV4 {
+    return  new ExtrinsicPayloadV4(this.registry, {
       blockHash,
       era: era || IMMORTAL_ERA,
-      doughnut: doughnut || createType(this.registry, 'Option<Doughnut>'),
       genesisHash,
       method: method.toHex(),
       nonce,
@@ -155,7 +157,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
         // [[tip]] is now set inside [[transactionPayment]]
         // This doesn't do anything, just signalling our intention not to use it.
       tip: null,
-      transactionPayment: transactionPayment || createType(this.registry, 'ChargeTransactionPayment')
+      transactionVersion: transactionVersion || 0,
     });
   }
 
@@ -163,10 +165,9 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description Generate a payload and applies the signature from a keypair
    */
   public sign (method: Call, account: IKeyringPair, options: SignatureOptions): IExtrinsicSignature {
-    const signer = createType(this.registry, 'Address', account.publicKey);
+    const signer = this.registry.createType( 'Address', account.addressRaw);
     const payload = this.createPayload(method, options);
-    const signature = createType(this.registry, 'MultiSignature', payload.sign(account));
-
+    const signature = this.registry.createType('MultiSignature', payload.sign(account));
     return this.injectSignature(signer, signature, payload);
   }
 
@@ -174,9 +175,9 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description Generate a payload and applies a fake signature
    */
   public signFake (method: Call, address: Address | Uint8Array | string, options: SignatureOptions): IExtrinsicSignature {
-    const signer = createType(this.registry, 'Address', address);
+    const signer = this.registry.createType( 'Address', address);
     const payload = this.createPayload(method, options);
-    const signature = createType(this.registry, 'MultiSignature', u8aConcat(new Uint8Array([1]), new Uint8Array(64).fill(0x42)));
+    const signature = this.registry.createType('MultiSignature', u8aConcat(new Uint8Array([1]), new Uint8Array(64).fill(0x42)));
 
     return this.injectSignature(signer, signature, payload);
   }

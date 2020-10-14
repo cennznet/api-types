@@ -13,7 +13,7 @@
 // limitations under the License.
 
 import CENNZnetTypes from '../src/interfaces/injects';
-import {ApiPromise, WsProvider} from '@polkadot/api';
+import {ApiPromise, SubmittableResult, WsProvider} from '@polkadot/api';
 import { TypeRegistry } from '@polkadot/types';
 import {cryptoWaitReady} from '@polkadot/util-crypto';
 import * as balances from '../src/balances';
@@ -42,9 +42,6 @@ describe('e2e transactions', () => {
       derives,
       registry,
     });
-    // compatibility patch, don't use upstream composite account
-    api.query.system.account = api.query.system.accountNonce;
-
   });
 
   afterAll(async () => {
@@ -54,14 +51,19 @@ describe('e2e transactions', () => {
   describe('Send extrinsics', () => {
 
     it('does a GA transfer with keypair via signAndSend', async done => {
-      const nonce = await api.query.system.accountNonce(alice.address);
-      const balanceBefore = await api.query.genericAsset.freeBalance(16000, bob.address);
+      const nonce = await api.rpc.system.accountNextIndex(alice.address);
       const transferAmount = 4124;
-      await api.tx.genericAsset.transfer(16000, bob.address, transferAmount).signAndSend(alice, {nonce});
-      // Check the change in balance
-      await api.query.genericAsset.freeBalance(16000, bob.address, (balanceAfter: Balance) => {
-          (new BN(balanceAfter.toString()).toFixed() == new BN(balanceBefore.toString()).plus(transferAmount).toFixed()) ? done() : null
-        });
+
+      await api.tx.genericAsset
+          .transfer(16000, bob.address, transferAmount)
+          .signAndSend(alice, { nonce },
+              async ({ events, status }: SubmittableResult) => {
+                if (status.isInBlock) {
+                  expect(events[0].event.method).toEqual('Transferred');
+                  expect(events[0].event.section).toEqual('genericAsset');
+                  done();
+                }
+          });
     });
   });
 });

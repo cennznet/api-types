@@ -5,30 +5,32 @@
 import { Bytes, Compact, Option, Struct, u32 } from '@polkadot/types';
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
 import { sign } from '@polkadot/types/extrinsic/util';
-import { IKeyringPair, Registry } from '@polkadot/types/types';
+import {ExtrinsicPayloadValue, IKeyringPair, Registry} from '@polkadot/types/types';
 
-import { ExtrinsicPayloadValue } from '../types';
-import { ChargeTransactionPayment, Doughnut, Index } from  '../../types';
-
+// import { ExtrinsicPayloadValue } from '../types';
+import { ChargeTransactionPayment, Index } from  '../../types';
+import {defaultExtensions, expandExtensionTypes} from "../signedExtensions";
+// import { InterfaceRegistry } from '@polkadot/types/interfaceRegistry';
 
 // TODO: Load [[Extra]] from metadata e.g.:
 // ...registry.getSignedExtensionTypes(),
 // ...registry.getSignedExtensionExtra()
 
+// export type CennznetInterfaceTypes = keyof InterfaceRegistry;
 // The extended extrinsic payload types
-export const Extra: Record<string, InterfaceTypes> = {
-  method: 'Bytes',
-  doughnut: 'Option<Doughnut>',
-  era: 'ExtrinsicEra',
-  nonce: 'Compact<Index>',
-  transactionPayment: 'ChargeTransactionPayment',
-  // These fields are signed here as part of the extrinsic signature but are NOT encoded in
-  // the final extrinsic payload itself.
-  // The CENNZnet node will populate these fields from on-chain data and check the signature compares
-  specVersion: 'u32',
-  genesisHash: 'Hash',
-  blockHash: 'Hash',
-};
+// export const Extra: Record<string, InterfaceTypes> = {
+//   method: 'Bytes',
+//   // doughnut: 'Option<Doughnut>',
+//   era: 'ExtrinsicEra',
+//   nonce: 'Compact<Index>',
+//   transactionPayment: 'ChargeTransactionPayment',
+//   // These fields are signed here as part of the extrinsic signature but are NOT encoded in
+//   // the final extrinsic payload itself.
+//   // The CENNZnet node will populate these fields from on-chain data and check the signature compares
+//   specVersion: 'u32',
+//   genesisHash: 'Hash',
+//   blockHash: 'Hash',
+// };
 
 /**
  * @name CENNZnetExtrinsicPayloadV1
@@ -40,7 +42,8 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
   constructor (registry: Registry, value?: ExtrinsicPayloadValue | Uint8Array | string) {
     super(registry, {
       method: 'Bytes',
-      ...Extra
+      ...expandExtensionTypes(defaultExtensions as string[], 'types'),
+      ...expandExtensionTypes(defaultExtensions as string[], 'extra'),
     }, value);
   }
 
@@ -90,7 +93,14 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
    * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
    */
   get tip(): Compact<Balance> {
-    return this.transactionPayment.tip as Compact<Balance>;
+    return this.get('tip') as Compact<Balance>;
+  }
+
+  /**
+   * @description The transactionVersion for this signature
+   */
+  public get transactionVersion (): u32 {
+    return this.get('transactionVersion') as u32;
   }
 
   /**
@@ -98,13 +108,6 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
    */
   get transactionPayment(): ChargeTransactionPayment {
     return this.get('transactionPayment') as ChargeTransactionPayment;
-  }
-
-  /**
-   * @description The [[Doughnut]]
-   */
-  get doughnut(): Option<Doughnut> {
-    return this.get('doughnut') as Option<Doughnut>;
   }
   
   /**
