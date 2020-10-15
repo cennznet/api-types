@@ -47,6 +47,12 @@ export interface MemberRoles extends Enum {
   readonly isMemberRole: boolean;
 }
 
+/** @name Message */
+export interface Message extends Bytes {}
+
+/** @name MessageId */
+export interface MessageId extends u32 {}
+
 /** @name Meta */
 export interface Meta extends ITuple<[Text, Text]> {}
 

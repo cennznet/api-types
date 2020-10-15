@@ -5,7 +5,8 @@ import { AnyNumber, ITuple } from '@polkadot/types/types';
 import { Compact, Option, U8aFixed, Vec } from '@polkadot/types/codec';
 import { Bytes, Data, bool, u16, u32, u64 } from '@polkadot/types/primitive';
 import { FeeRate } from '@cennznet/api-types/interfaces/cennzx';
-import { AcceptPayload, DeviceId, Invite, Meta, PreKeyBundle, VaultKey, VaultValue } from '@cennznet/api-types/interfaces/sylo';
+import { AssetInfo } from '@cennznet/api-types/interfaces/ga';
+import { AcceptPayload, DeviceId, Invite, Message, MessageId, Meta, PreKeyBundle, VaultKey, VaultValue } from '@cennznet/api-types/interfaces/sylo';
 import { BabeEquivocationProof } from '@polkadot/types/interfaces/babe';
 import { ProposalIndex } from '@polkadot/types/interfaces/collective';
 import { Extrinsic, Signature } from '@polkadot/types/interfaces/extrinsics';
@@ -129,7 +130,7 @@ declare module '@polkadot/api/types/submittable' {
        * O(1) Limited number of read and writes.
        * Should not be called often.
        **/
-      create: AugmentedSubmittable<(owner: AccountId | string | Uint8Array, options: AssetOptions | { initial_issuance?: any; permissions?: any } | string | Uint8Array, info: AssetInfo | null) => SubmittableExtrinsic<ApiType>>;
+      create: AugmentedSubmittable<(owner: AccountId | string | Uint8Array, options: AssetOptions | { initialIssuance?: any; permissions?: any } | string | Uint8Array, info: AssetInfo | { symbol?: any; decimalPlaces?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
       /**
        * Create a new asset with reserved asset_id.
        * Internally calls create_asset with an asset_id
@@ -138,7 +139,7 @@ declare module '@polkadot/api/types/submittable' {
        * Weights:
        * O(1) Limited read/writes
        **/
-      createReserved: AugmentedSubmittable<(assetId: AssetId | AnyNumber | Uint8Array, options: AssetOptions | { initial_issuance?: any; permissions?: any } | string | Uint8Array, info: AssetInfo | null) => SubmittableExtrinsic<ApiType>>;
+      createReserved: AugmentedSubmittable<(assetId: AssetId | AnyNumber | Uint8Array, options: AssetOptions | { initialIssuance?: any; permissions?: any } | string | Uint8Array, info: AssetInfo | { symbol?: any; decimalPlaces?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
       /**
        * Mints an asset, increases its total issuance. Deposits the newly minted currency into target account
        * The origin must have `mint` permissions.
@@ -174,7 +175,7 @@ declare module '@polkadot/api/types/submittable' {
        * O(1) limited number of read and writes
        * Expected to not be called frequently
        **/
-      updateAssetInfo: AugmentedSubmittable<(assetId: Compact<AssetId> | AnyNumber | Uint8Array, info: AssetInfo | null) => SubmittableExtrinsic<ApiType>>;
+      updateAssetInfo: AugmentedSubmittable<(assetId: Compact<AssetId> | AnyNumber | Uint8Array, info: AssetInfo | { symbol?: any; decimalPlaces?: any } | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
       /**
        * Updates permissions(mint/burn/change permission) for a given `asset_id` and an account.
        * 
@@ -1122,7 +1123,7 @@ declare module '@polkadot/api/types/submittable' {
        * O(1)
        * 1 write
        **/
-      addValue: AugmentedSubmittable<(peerId: AccountId | string | Uint8Array, value: Message | null) => SubmittableExtrinsic<ApiType>>;
+      addValue: AugmentedSubmittable<(peerId: AccountId | string | Uint8Array, value: Message | string | Uint8Array) => SubmittableExtrinsic<ApiType>>;
       /**
        * Delete a value from storage
        * 
@@ -1130,7 +1131,7 @@ declare module '@polkadot/api/types/submittable' {
        * O(n) where n is number of values in the storage
        * 1 write
        **/
-      deleteValues: AugmentedSubmittable<(valueIds: Vec<MessageId> | (MessageId | null)[]) => SubmittableExtrinsic<ApiType>>;
+      deleteValues: AugmentedSubmittable<(valueIds: Vec<MessageId> | (MessageId | AnyNumber | Uint8Array)[]) => SubmittableExtrinsic<ApiType>>;
     };
     syloPayment: {
       [key: string]: SubmittableExtrinsicFunction<ApiType>;

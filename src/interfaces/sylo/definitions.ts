@@ -43,5 +43,7 @@ export default {
     },
     VaultKey: 'Bytes',
     VaultValue: 'Bytes',
+    MessageId: 'u32',
+    Message: 'Bytes',
   }
 }
