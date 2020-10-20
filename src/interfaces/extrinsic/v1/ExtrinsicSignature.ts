@@ -28,8 +28,7 @@ import {
   ExtrinsicPayloadValue,
   IExtrinsicSignature,
   IKeyringPair,
-  Registry,
-  SignatureOptions
+  Registry
 } from '@polkadot/types/types';
 import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/extrinsic/constants';
 import { u8aConcat } from '@polkadot/util';
@@ -37,7 +36,8 @@ import { u8aConcat } from '@polkadot/util';
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
 import {ExtrinsicSignatureOptions} from "@polkadot/types/extrinsic/types";
 import {expandExtensionTypes, defaultExtensions} from "../signedExtensions";
-import {ChargeTransactionPayment} from "../../transactionPayment";
+import {ChargeTransactionPayment} from '../../transactionPayment';
+import { SignatureOptions } from '../types';
 
 /**
  * @name CENNZnetExtrinsicSignatureV1
@@ -156,7 +156,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
   /**
    * @description Creates a payload from the supplied options
    */
-  public createPayload (method: Call, { blockHash, era, genesisHash, nonce, runtimeVersion: { specVersion, transactionVersion } }: SignatureOptions): ExtrinsicPayloadV4 {
+  public createPayload (method: Call, { blockHash, era, genesisHash, nonce, runtimeVersion: { specVersion, transactionVersion }, transactionPayment }: SignatureOptions): ExtrinsicPayloadV4 {
     return  new ExtrinsicPayloadV4(this.registry, {
       blockHash,
       era: era || IMMORTAL_ERA,
@@ -168,6 +168,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
         // This doesn't do anything, just signalling our intention not to use it.
       tip: null,
       transactionVersion: transactionVersion || 0,
+      transactionPayment: transactionPayment,
     });
   }
 
