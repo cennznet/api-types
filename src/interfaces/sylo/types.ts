@@ -84,6 +84,6 @@ export interface VaultKey extends Bytes {}
 export interface VaultValue extends Bytes {}
 
 /** @name WithdrawnPreKeyBundle */
-export interface WithdrawnPreKeyBundle extends ITuple<['AccountId', 'u32', 'Bytes']> {}
+export interface WithdrawnPreKeyBundle extends ITuple<[AccountId, u32, Bytes]> {}
 
 export type PHANTOM_SYLO = 'sylo';
