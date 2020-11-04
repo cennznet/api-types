@@ -10,6 +10,6 @@ export default {
                 Account: 'AccountId'
             }
         },
-        VecDeque: 'Vec',
+        VecDeque: 'Vec<BalanceOf<any>>',
     }
 }

@@ -2,7 +2,7 @@
 /* eslint-disable */
 
 import { Enum, Vec } from '@polkadot/types/codec';
-import { AccountId, Balance } from '@polkadot/types/interfaces/runtime';
+import { AccountId, Balance, BalanceOf } from '@polkadot/types/interfaces/runtime';
 
 /** @name RewardBalance */
 export interface RewardBalance extends Balance {}
@@ -19,6 +19,6 @@ export interface RewardDestination extends Enum {
 }
 
 /** @name VecDeque */
-export interface VecDeque extends Vec {}
+export interface VecDeque extends Vec<BalanceOf> {}
 
 export type PHANTOM_STAKING = 'staking';
