@@ -9,6 +9,7 @@ export default {
                 Controller: 'Null',
                 Account: 'AccountId'
             }
-        }
+        },
+        VecDeque: 'Vec',
     }
 }
