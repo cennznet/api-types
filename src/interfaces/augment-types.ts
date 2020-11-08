@@ -6,7 +6,7 @@ import { BitVec, Bytes, Data, DoNotConstruct, Null, StorageKey, Text, Type, U256
 import { AttestationTopic, AttestationValue } from '@cennznet/api-types/interfaces/attestation';
 import { ExchangeKey, FeeRate } from '@cennznet/api-types/interfaces/cennzx';
 import { AssetInfo } from '@cennznet/api-types/interfaces/ga';
-import { RewardBalance, RewardBalanceOf, RewardDestination, VecDeque } from '@cennznet/api-types/interfaces/staking';
+import { RewardBalance, RewardBalanceOf, RewardDestination } from '@cennznet/api-types/interfaces/staking';
 import { AcceptPayload, DeviceId, DeviceIdResponse, Group, Invite, Member, MemberRoles, Message, MessageId, Meta, PendingInvite, PreKeyBundle, PreKeyBundlesResponse, Response, VaultKey, VaultValue, WithdrawnPreKeyBundle } from '@cennznet/api-types/interfaces/sylo';
 import { ChargeTransactionPayment, FeeExchange, FeeExchangeV1 } from '@cennznet/api-types/interfaces/transactionPayment';
 import { BlockAttestations, IncludedBlocks, MoreAttestations } from '@polkadot/types/interfaces/attestations';
@@ -1530,9 +1530,6 @@ declare module '@polkadot/types/types/registry' {
     RewardDestination: RewardDestination;
     'Option<RewardDestination>': Option<RewardDestination>;
     'Vec<RewardDestination>': Vec<RewardDestination>;
-    VecDeque: VecDeque;
-    'Option<VecDeque>': Option<VecDeque>;
-    'Vec<VecDeque>': Vec<VecDeque>;
     Meta: Meta;
     'Option<Meta>': Option<Meta>;
     'Vec<Meta>': Vec<Meta>;

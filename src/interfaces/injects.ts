@@ -16,6 +16,7 @@
 
 import { CENNZnetExtrinsicSignatureV1, SignerPayload } from './extrinsic';
 import * as definitions from './definitions';
+import VecAny from "@polkadot/types/codec/VecAny";
 
 const _types = {
   ...definitions,
@@ -25,6 +26,7 @@ const _types = {
     types: {
       ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1,
       SignerPayload,
+      VecDeque: VecAny,
     }
   }
 };
