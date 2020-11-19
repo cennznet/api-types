@@ -14,9 +14,11 @@
 
 // CENNZnet types for injection into a polkadot API session
 
-import { CENNZnetExtrinsicSignatureV1, SignerPayload } from './extrinsic';
+import { OverrideBundleType } from '@polkadot/types/types/registry';
+import { CENNZnetExtrinsicSignatureV1, CENNZnetExtrinsicSignatureV0, SignerPayload } from './extrinsic';
 import * as definitions from './definitions';
 import VecAny from "@polkadot/types/codec/VecAny";
+import * as syloTypes from './sylo/v0/index';
 
 const _types = {
   ...definitions,
@@ -24,12 +26,32 @@ const _types = {
   // This funny format, makes it compatible with the structure from generated definitions
   other: {
     types: {
-      ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1,
       SignerPayload,
       VecDeque: VecAny,
     }
   }
 };
 
+export const typesBundle: OverrideBundleType = {
+  spec: {
+    cennznet: {
+      types: [
+        {
+          minmax: [0, 36],
+          types: {
+            ...syloTypes,
+            ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV0,
+          },
+        },
+        {
+          minmax: [37, undefined],
+          types: {
+            ExtrinsicSignatureV4: CENNZnetExtrinsicSignatureV1,
+          },
+        },
+      ],
+    },
+  },
+};
 // Unwind the nested type definitions into a flat map
 export default Object.values(_types).reduce((res, { types }): object => ({ ...res, ...types }), {});
