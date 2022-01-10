@@ -5,7 +5,7 @@
 import { Bytes, Compact, Option, Struct, u32 } from '@polkadot/types';
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
 import { sign } from '@polkadot/types/extrinsic/util';
-import { IKeyringPair, Registry } from '@polkadot/types/types';
+import { IKeyringPair, InterfaceTypes, Registry } from '@polkadot/types/types';
 
 import { ExtrinsicPayloadValue } from '../types';
 import { ChargeTransactionPayment, Doughnut, Index } from  '../../types';
@@ -16,7 +16,7 @@ import { ChargeTransactionPayment, Doughnut, Index } from  '../../types';
 // ...registry.getSignedExtensionExtra()
 
 // The extended extrinsic payload types
-export const Extra: Record<string, InterfaceTypes> = {
+export const Extra: Record<string, keyof InterfaceTypes> = {
   method: 'Bytes',
   doughnut: 'Option<Doughnut>',
   era: 'ExtrinsicEra',
