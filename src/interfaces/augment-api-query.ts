@@ -3,8 +3,7 @@
 
 import type { AttestationTopic, AttestationValue } from '@cennznet/api-types/interfaces/attestation';
 import type { ExchangeKey, FeeRate } from '@cennznet/api-types/interfaces/cennzx';
-import type { CollectionId, Listing, NFTAttributeValue, NFTSchema, RoyaltiesSchedule, TokenId } from '@cennznet/api-types/interfaces/nft';
-import type { DeviceId, Group, PreKeyBundle, VaultKey, VaultValue } from '@cennznet/api-types/interfaces/sylo';
+import type { CollectionId, Listing, NFTAttributeValue, RoyaltiesSchedule, TokenId } from '@cennznet/api-types/interfaces/nft';
 import type { ApiTypes } from '@polkadot/api-base/types';
 import type { Data } from '@polkadot/types';
 import type { Bytes, Option, U8aFixed, Vec, bool, u32, u64 } from '@polkadot/types-codec';
@@ -332,47 +331,47 @@ declare module '@polkadot/api-base/types/storage' {
       /**
        * Map from collection to owner address
        **/
-      collectionOwner: AugmentedQuery<ApiType, (arg: CollectionId | string) => Observable<Option<AccountId>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
+      collectionOwner: AugmentedQuery<ApiType, (arg: CollectionId | AnyNumber | Uint8Array) => Observable<Option<AccountId>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
       /**
        * Map from collection to it's defacto royalty scheme
        **/
-      collectionRoyalties: AugmentedQuery<ApiType, (arg: CollectionId | string) => Observable<Option<RoyaltiesSchedule>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
+      collectionRoyalties: AugmentedQuery<ApiType, (arg: CollectionId | AnyNumber | Uint8Array) => Observable<Option<RoyaltiesSchedule>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
       /**
        * Map from collection to its schema definition
        **/
-      collectionSchema: AugmentedQuery<ApiType, (arg: CollectionId | string) => Observable<Option<NFTSchema>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
+      collectionSchema: AugmentedQuery<ApiType, (arg: CollectionId | AnyNumber | Uint8Array) => Observable<Option<NFTSchema>>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
       /**
        * Block numbers where listings will close. It is `Some` if at block number, (collection id, token id) is listed and scheduled to close.
        **/
-      listingEndSchedule: AugmentedQuery<ApiType, (arg1: BlockNumber | AnyNumber | Uint8Array, arg2: ITuple<[CollectionId, TokenId]> | [CollectionId | string, TokenId | AnyNumber | Uint8Array]) => Observable<Option<ITuple<[]>>>, [BlockNumber, ITuple<[CollectionId, TokenId]>]> & QueryableStorageEntry<ApiType, [BlockNumber, ITuple<[CollectionId, TokenId]>]>;
+      listingEndSchedule: AugmentedQuery<ApiType, (arg1: BlockNumber | AnyNumber | Uint8Array, arg2: ITuple<[CollectionId, TokenId]> | [CollectionId | AnyNumber | Uint8Array, TokenId]) => Observable<Option<ITuple<[]>>>, [BlockNumber, ITuple<[CollectionId, TokenId]>]> & QueryableStorageEntry<ApiType, [BlockNumber, ITuple<[CollectionId, TokenId]>]>;
       /**
        * NFT sale/auction listings. keyed by collection id and token id
        **/
-      listings: AugmentedQuery<ApiType, (arg1: CollectionId | string, arg2: TokenId | AnyNumber | Uint8Array) => Observable<Option<Listing>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
+      listings: AugmentedQuery<ApiType, (arg1: CollectionId | AnyNumber | Uint8Array, arg2: TokenId) => Observable<Option<Listing>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
       /**
        * Winning bids on open listings. keyed by collection id and token id
        **/
-      listingWinningBid: AugmentedQuery<ApiType, (arg1: CollectionId | string, arg2: TokenId | AnyNumber | Uint8Array) => Observable<Option<ITuple<[AccountId, Balance]>>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
+      listingWinningBid: AugmentedQuery<ApiType, (arg1: CollectionId | AnyNumber | Uint8Array, arg2: TokenId) => Observable<Option<ITuple<[AccountId, Balance]>>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
       /**
        * The next available token Id for an NFT collection
        **/
-      nextTokenId: AugmentedQuery<ApiType, (arg: CollectionId | string) => Observable<TokenId>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
+      nextTokenId: AugmentedQuery<ApiType, (arg: CollectionId | AnyNumber | Uint8Array) => Observable<TokenId>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
       /**
        * The total number an NFT collection in circulation (excludes burnt tokens)
        **/
-      tokenIssuance: AugmentedQuery<ApiType, (arg: CollectionId | string) => Observable<TokenId>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
+      tokenIssuance: AugmentedQuery<ApiType, (arg: CollectionId | AnyNumber | Uint8Array) => Observable<TokenId>, [CollectionId]> & QueryableStorageEntry<ApiType, [CollectionId]>;
       /**
        * Map from (collection, token) to it's owner
        **/
-      tokenOwner: AugmentedQuery<ApiType, (arg1: CollectionId | string, arg2: TokenId | AnyNumber | Uint8Array) => Observable<AccountId>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
+      tokenOwner: AugmentedQuery<ApiType, (arg1: CollectionId | AnyNumber | Uint8Array, arg2: TokenId) => Observable<AccountId>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
       /**
        * Map from a token to it's royalty scheme
        **/
-      tokenRoyalties: AugmentedQuery<ApiType, (arg1: CollectionId | string, arg2: TokenId | AnyNumber | Uint8Array) => Observable<Option<RoyaltiesSchedule>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
+      tokenRoyalties: AugmentedQuery<ApiType, (arg1: CollectionId | AnyNumber | Uint8Array, arg2: TokenId) => Observable<Option<RoyaltiesSchedule>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
       /**
        * Map from (collection, token) to it's attributes (as defined by schema)
        **/
-      tokens: AugmentedQuery<ApiType, (arg1: CollectionId | string, arg2: TokenId | AnyNumber | Uint8Array) => Observable<Vec<NFTAttributeValue>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
+      tokens: AugmentedQuery<ApiType, (arg1: CollectionId | AnyNumber | Uint8Array, arg2: TokenId) => Observable<Vec<NFTAttributeValue>>, [CollectionId, TokenId]> & QueryableStorageEntry<ApiType, [CollectionId, TokenId]>;
       /**
        * Generic query
        **/
@@ -733,7 +732,7 @@ declare module '@polkadot/api-base/types/storage' {
       [key: string]: QueryableStorageEntry<ApiType>;
     };
     syloE2EE: {
-      preKeyBundles: AugmentedQuery<ApiType, (arg: ITuple<[AccountId, DeviceId]> | [AccountId | string | Uint8Array, DeviceId | AnyNumber | Uint8Array]) => Observable<Vec<PreKeyBundle>>, [ITuple<[AccountId, DeviceId]>]> & QueryableStorageEntry<ApiType, [ITuple<[AccountId, DeviceId]>]>;
+      preKeyBundles: AugmentedQuery<ApiType, (arg: ITuple<[AccountId, DeviceId]> | [AccountId | string | Uint8Array, DeviceId]) => Observable<Vec<PreKeyBundle>>, [ITuple<[AccountId, DeviceId]>]> & QueryableStorageEntry<ApiType, [ITuple<[AccountId, DeviceId]>]>;
       /**
        * Generic query
        **/

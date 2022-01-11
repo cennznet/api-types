@@ -1,4 +1,4 @@
-// Copyright 2017-2020 @polkadot/types authors & contributors & Centrality Investments Limited 2020
+// Copyright 2019-2020 Centrality Investments Limited
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,31 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Compact, Option, Struct, u8, createType} from '@polkadot/types';
+import { Compact, Struct, u8, Vec } from '@polkadot/types';
+import { Text } from '@polkadot/types/primitive/Text';
+import { Balance, BlockNumber, Call, ExtrinsicEra, Hash, RuntimeVersion } from '@polkadot/types/interfaces';
 import {
-  Balance,
-  BlockNumber,
-  Call,
-  ExtrinsicEra,
-  Hash,
-  RuntimeVersion,
-} from '@polkadot/types/interfaces';
-import {
+  AnyJson,
   Codec,
   Constructor,
   ISignerPayload,
   SignerPayloadJSON as SignerPayloadJSONBase,
   SignerPayloadRaw,
 } from '@polkadot/types/types';
-import {u8aToHex} from '@polkadot/util';
+import { u8aToHex } from '@polkadot/util';
 
-import {Address, Index} from '../types';
-import Doughnut from '../Doughnut';
-import {ChargeTransactionPayment} from '../runtime/transaction-payment';
+import { Address, Index } from '../types';
+import { ChargeTransactionPayment } from '../transactionPayment';
+import { defaultExtensions } from "./signedExtensions";
 
 export interface SignerPayloadJSON extends SignerPayloadJSONBase {
-  doughnut?: string;
-  transactionPayment?: string;
+  transactionPayment?: Record<string, AnyJson>;
 }
 
 export interface SignerPayloadType extends Codec {
@@ -48,9 +42,9 @@ export interface SignerPayloadType extends Codec {
   method: Call;
   nonce: Compact<Index>;
   runtimeVersion: RuntimeVersion;
+  signedExtensions: Vec<Text>;
   tip?: Compact<Balance>;
   version: u8;
-  doughnut: Option<Doughnut>;
   transactionPayment: ChargeTransactionPayment;
 }
 
@@ -60,7 +54,6 @@ const _Payload: Constructor<SignerPayloadType> = Struct.with({
   address: 'Address',
   blockHash: 'Hash',
   blockNumber: 'BlockNumber',
-  doughnut: 'Option<Doughnut>',
   era: 'ExtrinsicEra',
   genesisHash: 'Hash',
   method: 'Call',
@@ -68,7 +61,7 @@ const _Payload: Constructor<SignerPayloadType> = Struct.with({
   runtimeVersion: 'RuntimeVersion',
   tip: 'Compact<Balance>',
   transactionPayment: 'ChargeTransactionPayment',
-  version: 'u8'
+  version: 'u8',
 }) as any;
 
 /**
@@ -80,14 +73,34 @@ export default class SignerPayload extends _Payload implements ISignerPayload {
   /**
    * @description Creates an representation of the structure as an ISignerPayload JSON
    */
-  public toPayload (): SignerPayloadJSON {
-    const { address, blockHash, blockNumber, doughnut, era, genesisHash, method, nonce, runtimeVersion: { specVersion }, tip, transactionPayment, version } = this;
+  toPayload(): SignerPayloadJSON {
+    const {
+      address,
+      blockHash,
+      blockNumber,
+      era,
+      genesisHash,
+      method,
+      nonce,
+      runtimeVersion: { specVersion, transactionVersion },
+      transactionPayment,
+      version,
+      signedExtensions,
+      tip
+    } = this;
+
+    if (signedExtensions) {
+      console.warn(`custom signed extensions will be ignored`);
+    }
+
+    if (!tip.isEmpty) {
+      console.warn(`ignoring tip. use transactionPayment.tip`);
+    }
 
     return {
       address: address.toString(),
       blockHash: blockHash.toHex(),
       blockNumber: blockNumber.toHex(),
-      doughnut: doughnut.toHex(),
       era: era.toHex(),
       genesisHash: genesisHash.toHex(),
       method: method.toHex(),
@@ -95,24 +108,27 @@ export default class SignerPayload extends _Payload implements ISignerPayload {
       specVersion: specVersion.toHex(),
       // [[tip]] is contained within [[transactionPayment]]
       tip: null,
-      transactionPayment: transactionPayment.toHex(),
-      version: version.toNumber()
+      transactionVersion: transactionVersion.toHex(),
+      transactionPayment: transactionPayment.toJSON(),
+      version: version.toNumber(),
+      signedExtensions: defaultExtensions
     };
   }
 
   /**
-   * @description Creates a representation of the payload in raw Exrinsic form
+   * @description Creates a representation of the payload in raw Extrinsic form
    */
-  public toRaw (): SignerPayloadRaw {
+  toRaw(): SignerPayloadRaw {
     const payload = this.toPayload();
     // NOTE Explicitly pass the bare flag so the method is encoded un-prefixed (non-decodable, for signing only)
-    const data = u8aToHex(createType(this.registry, 'CENNZnetExtrinsicPayloadV1', payload, { version: payload.version }).toU8a({ method: true }));
+    const data = u8aToHex(
+      this.registry.createType('ExtrinsicPayload', payload, { version: payload.version }).toU8a({ method: true })
+    );
 
     return {
       address: payload.address,
       data,
-      type: 'payload'
+      type: 'payload',
     };
   }
-
 }

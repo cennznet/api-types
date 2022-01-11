@@ -1,11 +1,14 @@
 // Auto-generated via `yarn polkadot-types-from-chain`, do not edit
 /* eslint-disable */
 
-import type { TokenId } from '@cennznet/api-types/interfaces/nft';
+import type { LiquidityPriceResponse, LiquidityValueResponse, PriceResponse } from '@cennznet/api-types/interfaces/cennzx';
+import type { EthyEventId, VersionedEventProof } from '@cennznet/api-types/interfaces/ethy';
+import type { ProposalVotes } from '@cennznet/api-types/interfaces/governance';
+import type { CollectionId } from '@cennznet/api-types/interfaces/nft';
 import type { AugmentedRpc } from '@polkadot/rpc-core/types';
 import type { Metadata, StorageKey } from '@polkadot/types';
 import type { Bytes, HashMap, Json, Null, Option, Text, U256, U64, Vec, bool, u32, u64 } from '@polkadot/types-codec';
-import type { AnyNumber, Codec } from '@polkadot/types-codec/types';
+import type { AnyNumber, Codec, ITuple } from '@polkadot/types-codec/types';
 import type { ExtrinsicOrHash, ExtrinsicStatus } from '@polkadot/types/interfaces/author';
 import type { EpochAuthorship } from '@polkadot/types/interfaces/babe';
 import type { BeefySignedCommitment } from '@polkadot/types/interfaces/beefy';
@@ -76,13 +79,21 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
     };
     cennzx: {
       /**
-       * Queries the CENNZX spot price to buy an asset
+       * Retrieves the spot exchange buy price
        **/
-      cennzx_buyPrice: AugmentedRpc<(assetToBuy: AssetId | AnyNumber | Uint8Array, amountToBuy: Balance | AnyNumber | Uint8Array, assetToSell: AssetId | AnyNumber | Uint8Array, at?: BlockHash | string | Uint8Array) => Observable<CENNZXSpotRpcResult>>;
+      buyPrice: AugmentedRpc<(AssetToBuy: AssetId | AnyNumber | Uint8Array, Amount: Balance | AnyNumber | Uint8Array, AssetToPay: AssetId | AnyNumber | Uint8Array) => Observable<PriceResponse>>;
       /**
-       * Queries the CENNZX spot price to sell an asset
+       * Get the price of liquidity for the given asset ID
        **/
-      cennzx_sellPrice: AugmentedRpc<(assetToSell: AssetId | AnyNumber | Uint8Array, amountToSell: Balance | AnyNumber | Uint8Array, assetToBuy: AssetId | AnyNumber | Uint8Array, at?: BlockHash | string | Uint8Array) => Observable<CENNZXSpotRpcResult>>;
+      liquidityPrice: AugmentedRpc<(AssetId: AssetId | AnyNumber | Uint8Array, liquidityToBuy: Balance | AnyNumber | Uint8Array) => Observable<LiquidityPriceResponse>>;
+      /**
+       * Get the value of an account's liquidity for the given asset
+       **/
+      liquidityValue: AugmentedRpc<(AccountId: Address | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array, AssetId: AssetId | AnyNumber | Uint8Array) => Observable<LiquidityValueResponse>>;
+      /**
+       * Retrieves the spot exchange sell price
+       **/
+      sellPrice: AugmentedRpc<(AssetToSell: AssetId | AnyNumber | Uint8Array, Amount: Balance | AnyNumber | Uint8Array, AssetToPayout: AssetId | AnyNumber | Uint8Array) => Observable<PriceResponse>>;
     };
     chain: {
       /**
@@ -334,6 +345,34 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        **/
       uninstallFilter: AugmentedRpc<(index: U256 | AnyNumber | Uint8Array) => Observable<bool>>;
     };
+    ethy: {
+      /**
+       * Get event proof for event Id
+       **/
+      getEventProof: AugmentedRpc<(EventId: EthyEventId | AnyNumber | Uint8Array) => Observable<Option<VersionedEventProof>>>;
+      /**
+       * Subscribe event proof
+       **/
+      subscribeEventProofs: AugmentedRpc<() => Observable<Option<VersionedEventProof>>>;
+    };
+    genericAsset: {
+      /**
+       * Get all registered generic assets (symbol, decimal places)
+       **/
+      registeredAssets: AugmentedRpc<() => Observable<Vec<ITuple<[AssetId, AssetInfo]>>>>;
+    };
+    governance: {
+      /**
+       * Get all proposals and the vote information
+       **/
+      getProposalVotes: AugmentedRpc<() => Observable<Vec<ProposalVotes>>>;
+    };
+    grandpa: {
+      /**
+       * Restarts the grandpa voter future
+       **/
+      restartVoter: AugmentedRpc<() => Observable<any>>;
+    };
     grandpa: {
       /**
        * Prove finality for the range (begin; end] hash.
@@ -372,7 +411,7 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
       /**
        * Get the tokens owned by an address in a certain collection
        **/
-      collectedTokens: AugmentedRpc<(collection: Bytes | string | Uint8Array, address: Address | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array) => Observable<Vec<TokenId>>>;
+      collectedTokens: AugmentedRpc<(collection: CollectionId | AnyNumber | Uint8Array, address: Address | { Id: any } | { Index: any } | { Raw: any } | { Address32: any } | { Address20: any } | string | Uint8Array) => Observable<Vec<EnhancedTokenId>>>;
     };
     offchain: {
       /**
@@ -399,6 +438,12 @@ declare module '@polkadot/rpc-core/types/jsonrpc' {
        * Retrieves the list of RPC methods that are exposed by the node
        **/
       methods: AugmentedRpc<() => Observable<RpcMethods>>;
+    };
+    staking: {
+      /**
+       * Retrieves the currently accrued reward for the specified stash
+       **/
+      accruedPayout: AugmentedRpc<(undefined: AccountId | string | Uint8Array) => Observable<u64>>;
     };
     state: {
       /**

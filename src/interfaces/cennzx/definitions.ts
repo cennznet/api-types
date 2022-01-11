@@ -1,54 +1,84 @@
 export default {
-    rpc: {
-      cennzx_buyPrice: {
-        description: 'Queries the CENNZX spot price to buy an asset',
-        params: [
-          {
-            name: 'assetToBuy',
-            type: 'AssetId'
-          },
-          {
-            name: 'amountToBuy',
-            type: 'Balance'
-          },
-          {
-            name: 'assetToSell',
-            type: 'AssetId'
-          },
-          {
-            name: 'at',
-            type: 'BlockHash',
-            isOptional: true
-          }
-        ],
-        type: 'CENNZXSpotRpcResult'
-      },
-      cennzx_sellPrice: {
-        description: 'Queries the CENNZX spot price to sell an asset',
-        params: [
-          {
-            name: 'assetToSell',
-            type: 'AssetId'
-          },
-          {
-            name: 'amountToSell',
-            type: 'Balance'
-          },
-          {
-            name: 'assetToBuy',
-            type: 'AssetId'
-          },
-          {
-            name: 'at',
-            type: 'BlockHash',
-            isOptional: true
-          }
-        ],
-        type: 'CENNZXSpotRpcResult'
-      }
+  rpc: {
+    buyPrice: {
+      description: 'Retrieves the spot exchange buy price',
+      params: [
+        {
+          name: 'AssetToBuy',
+          type: 'AssetId',
+        },
+        {
+          name: 'Amount',
+          type: 'Balance',
+        },
+        {
+          name: 'AssetToPay',
+          type: 'AssetId',
+        },
+      ],
+      type: 'PriceResponse',
     },
-    types: {
-      ExchangeKey: '(AssetId, AssetId)',
-      FeeRate: 'u128',
+    sellPrice: {
+      description: 'Retrieves the spot exchange sell price',
+      params: [
+        {
+          name: 'AssetToSell',
+          type: 'AssetId',
+        },
+        {
+          name: 'Amount',
+          type: 'Balance',
+        },
+        {
+          name: 'AssetToPayout',
+          type: 'AssetId',
+        },
+      ],
+      type: 'PriceResponse',
+    },
+    liquidityPrice: {
+      description: 'Get the price of liquidity for the given asset ID',
+      params: [
+        {
+          name: 'AssetId',
+          type: 'AssetId',
+        },
+        {
+          name: 'liquidityToBuy',
+          type: 'Balance',
+        },
+      ],
+      type: 'LiquidityPriceResponse',
+    },
+    liquidityValue: {
+      description: "Get the value of an account's liquidity for the given asset",
+      params: [
+        {
+          name: 'AccountId',
+          type: 'Address',
+        },
+        {
+          name: 'AssetId',
+          type: 'AssetId',
+        },
+      ],
+      type: 'LiquidityValueResponse',
+    },
+  },
+  types: {
+    ExchangeKey: '(AssetId, AssetId)',
+    FeeRate: 'u128',
+    LiquidityValueResponse: {
+      liquidity: 'Balance',
+      core: 'Balance',
+      asset: 'Balance'
+    },
+    PriceResponse: {
+      price: 'Balance'
+    },
+    LiquidityPriceResponse: {
+      core: 'Balance',
+      asset: 'Balance'
     }
-}
+  },
+};

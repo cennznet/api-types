@@ -1,34 +1,25 @@
-// Copyright 2017-2020 @polkadot/types authors & contributors & Centrality Investments Limited 2020
-// This software may be modified and distributed under the terms
-// of the Apache-2.0 license. See the LICENSE file for details.
+// Copyright 2019-2020 Centrality Investments Limited
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 
-import { Bytes, Compact, Option, Struct, u32 } from '@polkadot/types';
+import { Bytes, Compact, Struct, u32 } from '@polkadot/types';
 import { Balance, ExtrinsicEra, Hash } from '@polkadot/types/interfaces';
 import { sign } from '@polkadot/types/extrinsic/util';
-import { IKeyringPair, InterfaceTypes, Registry } from '@polkadot/types/types';
+import { IKeyringPair, Registry } from '@polkadot/types/types';
 
+import { ChargeTransactionPayment, Index } from '../../types';
+import { defaultExtensions, expandExtensionTypes } from '../signedExtensions';
 import { ExtrinsicPayloadValue } from '../types';
-import { ChargeTransactionPayment, Doughnut, Index } from  '../../types';
-
-
-// TODO: Load [[Extra]] from metadata e.g.:
-// ...registry.getSignedExtensionTypes(),
-// ...registry.getSignedExtensionExtra()
-
-// The extended extrinsic payload types
-export const Extra: Record<string, keyof InterfaceTypes> = {
-  method: 'Bytes',
-  doughnut: 'Option<Doughnut>',
-  era: 'ExtrinsicEra',
-  nonce: 'Compact<Index>',
-  transactionPayment: 'ChargeTransactionPayment',
-  // These fields are signed here as part of the extrinsic signature but are NOT encoded in
-  // the final extrinsic payload itself.
-  // The CENNZnet node will populate these fields from on-chain data and check the signature compares
-  specVersion: 'u32',
-  genesisHash: 'Hash',
-  blockHash: 'Hash',
-};
 
 /**
  * @name CENNZnetExtrinsicPayloadV1
@@ -37,52 +28,57 @@ export const Extra: Record<string, keyof InterfaceTypes> = {
  * on the contents included
  */
 export default class CENNZnetExtrinsicPayloadV1 extends Struct {
-  constructor (registry: Registry, value?: ExtrinsicPayloadValue | Uint8Array | string) {
-    super(registry, {
-      method: 'Bytes',
-      ...Extra
-    }, value);
+  constructor(registry: Registry, value?: ExtrinsicPayloadValue | Uint8Array | string) {
+    super(
+      registry,
+      {
+        method: 'Bytes',
+        ...expandExtensionTypes(defaultExtensions as string[], 'extrinsic'),
+        ...expandExtensionTypes(defaultExtensions as string[], 'payload'),
+      },
+      value
+    );
   }
 
   /**
    * @description The block [[Hash]] the signature applies to (mortal/immortal)
    */
-  public get blockHash (): Hash {
+  get blockHash(): Hash {
     return this.get('blockHash') as Hash;
   }
 
   /**
    * @description The [[ExtrinsicEra]]
    */
-  public get era (): ExtrinsicEra {
+  get era(): ExtrinsicEra {
     return this.get('era') as ExtrinsicEra;
   }
 
   /**
    * @description The genesis [[Hash]] the signature applies to (mortal/immortal)
    */
-  public get genesisHash (): Hash {
+  get genesisHash(): Hash {
     return this.get('genesisHash') as Hash;
   }
 
   /**
    * @description The [[Bytes]] contained in the payload
    */
-  public get method (): Bytes {
+  get method(): Bytes {
     return this.get('method') as Bytes;
   }
 
   /**
    * @description The [[Index]]
    */
-  public get nonce (): Compact<Index> {
+  get nonce(): Compact<Index> {
     return this.get('nonce') as Compact<Index>;
   }
 
   /**
    * @description The specVersion for this signature
    */
-  public get specVersion (): u32 {
+  get specVersion(): u32 {
     return this.get('specVersion') as u32;
   }
 
@@ -94,6 +90,13 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
   }
 
   /**
+   * @description The transactionVersion for this signature
+   */
+  get transactionVersion(): u32 {
+    return this.get('transactionVersion') as u32;
+  }
+
+  /**
    * @description The transaction fee metadata e.g tip, fee exchange
    */
   get transactionPayment(): ChargeTransactionPayment {
@@ -101,16 +104,9 @@ export default class CENNZnetExtrinsicPayloadV1 extends Struct {
   }
 
   /**
-   * @description The [[Doughnut]]
-   */
-  get doughnut(): Option<Doughnut> {
-    return this.get('doughnut') as Option<Doughnut>;
-  }
-  
-  /**
    * @description Sign the payload with the keypair
    */
-  public sign (signerPair: IKeyringPair): Uint8Array {
+  sign(signerPair: IKeyringPair): Uint8Array {
     // NOTE The `toU8a({ method: true })` argument is absolutely critical - we don't want the method (Bytes)
     // to have the length prefix included. This means that the data-as-signed is un-decodable,
     // but is also doesn't need the extra information, only the pure data (and is not decoded)

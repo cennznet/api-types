@@ -12,30 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Extrinsic related type defintions
+// Extrinsic related type definitions
 
-import Option from '@polkadot/types/codec/Option';
-import { ExtrinsicSignatureOptions as ExtrinsicSignatureOptionsBase } from '@polkadot/types/extrinsic/types';
 import {
   AnyU8a,
   ExtrinsicPayloadValue as ExtrinsicPayloadValueBase,
   SignatureOptions as SignatureOptionsBase,
 } from '@polkadot/types/types';
-import Doughnut from '../Doughnut';
-import {ChargeTransactionPayment } from '../runtime/transaction-payment';
-
-export interface ExtrinsicSignatureOptions extends ExtrinsicSignatureOptionsBase {
-  doughnut?: Option<Doughnut>;
-  transactionPayment?: ChargeTransactionPayment;
-}
+import { Option } from '@polkadot/types';
+import { ChargeTransactionPayment, FeeExchange } from '../transactionPayment';
+import { doughnut } from '../types';
 
 export interface ExtrinsicPayloadValue extends ExtrinsicPayloadValueBase {
-  doughnut?: AnyU8a | Option<Doughnut>;
   transactionPayment?: AnyU8a | ChargeTransactionPayment;
 }
 
 export interface SignatureOptions extends SignatureOptionsBase {
-  doughnut?: AnyU8a | Doughnut;
   transactionPayment?: AnyU8a | ChargeTransactionPayment;
 }
 
+export interface ExtrinsicV0SignatureOptions extends SignatureOptionsBase {
+  doughnut?: Option<doughnut>;
+  transactionPayment?: ChargeTransactionPayment;
+  feeExchange?: FeeExchange;
+}

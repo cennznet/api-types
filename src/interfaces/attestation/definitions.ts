@@ -1,7 +1,6 @@
 export default {
-    rpc: {},
-    types: {
-      AttestationTopic: 'u256',
-      AttestationValue: 'u256',
-    }
-}
+  types: {
+    AttestationTopic: 'u256',
+    AttestationValue: 'u256',
+  },
+};
