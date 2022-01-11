@@ -1,9 +1,9 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import type { AssetId, Balance } from '@cennznet/api-types/interfaces/runtime';
 import type { Struct, u128 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
-import type { AssetId, Balance } from '@polkadot/types/interfaces/runtime';
 
 /** @name ExchangeKey */
 export interface ExchangeKey extends ITuple<[AssetId, AssetId]> {}

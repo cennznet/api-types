@@ -1,7 +1,7 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
-export * from './attestation/types';
+export * from './runtime/types';
 export * from './cennzx/types';
 export * from './genericAsset/types';
 export * from './grandpa/types';

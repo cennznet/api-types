@@ -1,25 +1,19 @@
 {
   "compilerOptions": {
-    "allowJs": false,
-    "target": "esnext",
-    "moduleResolution": "node",
+    "target": "es6",
     "module": "commonjs",
-    "allowSyntheticDefaultImports": true,
-    "outDir": "./dist",
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "declaration": true
+    "lib": ["es2017", "es7", "es6", "dom"],
+    "declaration": true,
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true
   },
   "paths": {
-    "@cennznet/api-types/*": ["src/interfaces/*"],
-    "@polkadot/api/augment": ["src/interfaces/augment-api.ts"],
-    "@polkadot/types/augment": ["src/interfaces/augment-types.ts"]
+    "@cennznet/api-types/interfaces/*": ["src/interfaces/*"],
   },
-  "typeRoots": [
-    "./node_modules/@types"
-  ],
   "exclude": [
-    "dist/**/*",
-    "node_modules"
+    "src/**/*",
+    "node_modules",
+    "tests"
   ]
 }

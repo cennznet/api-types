@@ -1,9 +1,9 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import type { AccountId, BlockNumber } from '@cennznet/api-types/interfaces/runtime';
 import type { Bytes, Enum, Option, Struct, Vec, bool, u128, u64, u8 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
-import type { AccountId, BlockNumber } from '@polkadot/types/interfaces/runtime';
 
 /** @name GovernanceProposal */
 export interface GovernanceProposal extends Struct {

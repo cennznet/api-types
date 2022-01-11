@@ -1,8 +1,8 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import type { AccountId, Balance, LockIdentifier } from '@cennznet/api-types/interfaces/runtime';
 import type { Bytes, Compact, Enum, Set, Struct, u64, u8 } from '@polkadot/types-codec';
-import type { AccountId, Balance, LockIdentifier } from '@polkadot/types/interfaces/runtime';
 
 /** @name AssetInfoV40 */
 export interface AssetInfoV40 extends Struct {

@@ -1,13 +1,10 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import type { LockIdentifier } from '@cennznet/api-types/interfaces/runtime';
 import type { Enum, Raw, Struct, U8aFixed, bool, u32, u64 } from '@polkadot/types-codec';
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AllowedSlots } from '@polkadot/types/interfaces/babe';
-import type { AccountId, LockIdentifier } from '@polkadot/types/interfaces/runtime';
-
-/** @name Address */
-export interface Address extends AccountId {}
 
 /** @name BabeEpochConfiguration */
 export interface BabeEpochConfiguration extends Struct {
@@ -34,9 +31,6 @@ export interface DispatchInfoTo36 extends Struct {
 
 /** @name doughnut */
 export interface doughnut extends Raw {}
-
-/** @name Index */
-export interface Index extends u64 {}
 
 /** @name PalletId */
 export interface PalletId extends LockIdentifier {}

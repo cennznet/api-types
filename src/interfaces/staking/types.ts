@@ -1,8 +1,8 @@
 // Auto-generated via `yarn polkadot-types-from-defs`, do not edit
 /* eslint-disable */
 
+import type { AccountId, Balance } from '@cennznet/api-types/interfaces/runtime';
 import type { Enum, Vec, u64 } from '@polkadot/types-codec';
-import type { AccountId, Balance } from '@polkadot/types/interfaces/runtime';
 
 /** @name RewardBalance */
 export interface RewardBalance extends Balance {}
