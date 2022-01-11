@@ -12,7 +12,6 @@
     "@cennznet/api-types/interfaces/*": ["src/interfaces/*"],
   },
   "exclude": [
-    "src/**/*",
     "node_modules",
     "tests"
   ]
