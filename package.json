@@ -1,6 +1,6 @@
 {
     "name": "@cennznet/api-types",
-    "version": "4.0.0-dev",
+    "version": "4.0.2-dev",
     "description": "Type definitions for CENNZnet runtime",
     "author": "Centrality Developers <developers@centrality.ai>",
     "keywords": [

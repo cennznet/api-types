@@ -19,6 +19,7 @@ import {
   EcdsaSignature,
   Ed25519Signature,
   ExtrinsicEra,
+  ExtrinsicSignature,
   Index,
   MultiSignature,
   Sr25519Signature,
@@ -26,13 +27,22 @@ import {
 import { Compact, Struct } from '@polkadot/types';
 import { ExtrinsicPayloadValue, IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
 import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/extrinsic/constants';
-import { u8aConcat } from '@polkadot/util';
+import { assert, isU8a, stringify, u8aConcat, u8aToHex } from '@polkadot/util';
 
 import { ExtrinsicSignatureOptions } from '@polkadot/types/extrinsic/types';
 import { expandExtensionTypes, defaultExtensions } from '../signedExtensions';
 import { ChargeTransactionPayment } from '../../transactionPayment';
 import { SignatureOptions } from '../types';
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
+import { CodecRegistry } from '@polkadot/types-codec/types';
+import { HexString } from '@polkadot/util/types';
+
+// Ensure we have enough data for all types of signatures
+const FAKE_SIGNATURE = new Uint8Array(256).fill(1);
+
+function toAddress (registry: CodecRegistry, address: Address | Uint8Array | string): Address {
+  return registry.createTypeUnsafe('Address', [isU8a(address) ? u8aToHex(address) : address]);
+}
 
 /**
  * @name CENNZnetExtrinsicSignatureV1
@@ -41,7 +51,7 @@ import ExtrinsicPayloadV4 from './ExtrinsicPayload';
  */
 export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExtrinsicSignature {
   constructor(
-    registry: Registry,
+    registry: CodecRegistry,
     value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined,
     extSigOpt: ExtrinsicSignatureOptions = {}
   ) {
@@ -50,7 +60,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
       registry,
       {
         signer: 'Address',
-        signature: 'MultiSignature',
+        signature: 'ExtrinsicSignature',
         ...expandExtensionTypes(defaultExtensions as string[], 'extrinsic'),
       },
       CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned)
@@ -85,6 +95,10 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
     return !this.signature.isEmpty;
   }
 
+  public override get registry (): Registry {
+    return super.registry as Registry;
+  }
+
   /**
    * @description The [[ExtrinsicEra]] (mortal or immortal) this signature applies to
    */
@@ -103,14 +117,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description The actual [[EcdsaSignature]], [[Ed25519Signature]] or [[Sr25519Signature]]
    */
   get signature(): EcdsaSignature | Ed25519Signature | Sr25519Signature {
-    return this.multiSignature.value as Sr25519Signature;
-  }
-
-  /**
-   * @description The raw [[MultiSignature]]
-   */
-  get multiSignature(): MultiSignature {
-    return this.get('signature') as MultiSignature;
+    return (this.multiSignature.value ||  this.multiSignature) as Sr25519Signature;
   }
 
   /**
@@ -149,16 +156,19 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
   }
 
   /**
+  * @description The raw [[ExtrinsicSignature]]
+  */
+  public get multiSignature (): ExtrinsicSignature {
+    return this.getT('signature');
+  }
+
+  /**
    * @description Adds a raw signature
    */
-  addSignature(
-    signer: Address | Uint8Array | string,
-    signature: Uint8Array | string,
-    payload: ExtrinsicPayloadValue | Uint8Array | string
-  ): IExtrinsicSignature {
+   public addSignature (signer: Address | Uint8Array | string, signature: Uint8Array | HexString, payload: ExtrinsicPayloadValue | Uint8Array | HexString): IExtrinsicSignature {
     return this.injectSignature(
-      this.registry.createType('Address', signer),
-      this.registry.createType('MultiSignature', signature),
+      toAddress(this.registry, signer),
+      this.registry.createTypeUnsafe('ExtrinsicSignature', [signature]),
       new ExtrinsicPayloadV4(this.registry, payload)
     );
   }
@@ -186,6 +196,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
       specVersion,
       // [[tip]] is now set inside [[transactionPayment]]
       // This doesn't do anything, just signalling our intention not to use it.
+      //@ts-ignore
       tip: null,
       transactionVersion: transactionVersion || 0,
       transactionPayment: transactionPayment,
@@ -196,24 +207,30 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description Generate a payload and applies the signature from a keypair
    */
   sign(method: Call, account: IKeyringPair, options: SignatureOptions): IExtrinsicSignature {
-    const signer = this.registry.createType('Address', account.addressRaw);
+    assert(account && account.addressRaw, () => `Expected a valid keypair for signing, found ${stringify(account)}`);
+
     const payload = this.createPayload(method, options);
-    const signature = this.registry.createType('MultiSignature', payload.sign(account));
-    return this.injectSignature(signer, signature, payload);
+
+    return this.injectSignature(
+      toAddress(this.registry, account.addressRaw),
+      this.registry.createTypeUnsafe('ExtrinsicSignature', [payload.sign(account)]),
+      payload
+    );
   }
 
   /**
    * @description Generate a payload and applies a fake signature
    */
-  signFake(method: Call, address: Address | Uint8Array | string, options: SignatureOptions): IExtrinsicSignature {
-    const signer = this.registry.createType('Address', address);
-    const payload = this.createPayload(method, options);
-    const signature = this.registry.createType(
-      'MultiSignature',
-      u8aConcat(new Uint8Array([1]), new Uint8Array(64).fill(0x42))
-    );
+   public signFake (method: Call, address: Address | Uint8Array | string, options: SignatureOptions): IExtrinsicSignature {
+    assert(address, () => `Expected a valid address for signing, found ${stringify(address)}`);
 
-    return this.injectSignature(signer, signature, payload);
+    const payload = this.createPayload(method, options);
+
+    return this.injectSignature(
+      toAddress(this.registry, address),
+      this.registry.createTypeUnsafe('ExtrinsicSignature', [FAKE_SIGNATURE]),
+      payload
+    );
   }
 
   /**

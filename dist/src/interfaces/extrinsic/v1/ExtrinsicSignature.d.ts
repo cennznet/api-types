@@ -1,17 +1,19 @@
-import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, Index, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
+import { Address, Balance, Call, EcdsaSignature, Ed25519Signature, ExtrinsicEra, ExtrinsicSignature, Index, MultiSignature, Sr25519Signature } from '@polkadot/types/interfaces';
 import { Compact, Struct } from '@polkadot/types';
 import { ExtrinsicPayloadValue, IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
 import { ExtrinsicSignatureOptions } from '@polkadot/types/extrinsic/types';
 import { ChargeTransactionPayment } from '../../transactionPayment';
 import { SignatureOptions } from '../types';
 import ExtrinsicPayloadV4 from './ExtrinsicPayload';
+import { CodecRegistry } from '@polkadot/types-codec/types';
+import { HexString } from '@polkadot/util/types';
 /**
  * @name CENNZnetExtrinsicSignatureV1
  * @description
  * A container for the [[Signature]] associated with a specific [[Extrinsic]]
  */
 export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExtrinsicSignature {
-    constructor(registry: Registry, value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, extSigOpt?: ExtrinsicSignatureOptions);
+    constructor(registry: CodecRegistry, value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, extSigOpt?: ExtrinsicSignatureOptions);
     /** @internal */
     static decodeExtrinsicSignature(value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, isSigned?: boolean): CENNZnetExtrinsicSignatureV1 | Uint8Array;
     /**
@@ -22,6 +24,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
      * @description `true` if the signature is valid
      */
     get isSigned(): boolean;
+    get registry(): Registry;
     /**
      * @description The [[ExtrinsicEra]] (mortal or immortal) this signature applies to
      */
@@ -34,10 +37,6 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
      * @description The actual [[EcdsaSignature]], [[Ed25519Signature]] or [[Sr25519Signature]]
      */
     get signature(): EcdsaSignature | Ed25519Signature | Sr25519Signature;
-    /**
-     * @description The raw [[MultiSignature]]
-     */
-    get multiSignature(): MultiSignature;
     /**
      * @description The [[Address]] that signed
      */
@@ -52,9 +51,13 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
     get transactionPayment(): ChargeTransactionPayment;
     protected injectSignature(signer: Address, signature: MultiSignature, { era, nonce, transactionPayment }: ExtrinsicPayloadV4): IExtrinsicSignature;
     /**
+    * @description The raw [[ExtrinsicSignature]]
+    */
+    get multiSignature(): ExtrinsicSignature;
+    /**
      * @description Adds a raw signature
      */
-    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | string, payload: ExtrinsicPayloadValue | Uint8Array | string): IExtrinsicSignature;
+    addSignature(signer: Address | Uint8Array | string, signature: Uint8Array | HexString, payload: ExtrinsicPayloadValue | Uint8Array | HexString): IExtrinsicSignature;
     /**
      * @description Creates a payload from the supplied options
      */

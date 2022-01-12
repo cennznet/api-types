@@ -21,6 +21,11 @@ const constants_1 = require("@polkadot/types/extrinsic/constants");
 const util_1 = require("@polkadot/util");
 const signedExtensions_1 = require("../signedExtensions");
 const ExtrinsicPayload_1 = __importDefault(require("./ExtrinsicPayload"));
+// Ensure we have enough data for all types of signatures
+const FAKE_SIGNATURE = new Uint8Array(256).fill(1);
+function toAddress(registry, address) {
+    return registry.createTypeUnsafe('Address', [(0, util_1.isU8a)(address) ? (0, util_1.u8aToHex)(address) : address]);
+}
 /**
  * @name CENNZnetExtrinsicSignatureV1
  * @description
@@ -29,7 +34,7 @@ const ExtrinsicPayload_1 = __importDefault(require("./ExtrinsicPayload"));
 class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
     constructor(registry, value, extSigOpt = {}) {
         const isSigned = extSigOpt.isSigned;
-        super(registry, Object.assign({ signer: 'Address', signature: 'MultiSignature' }, (0, signedExtensions_1.expandExtensionTypes)(signedExtensions_1.defaultExtensions, 'extrinsic')), CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned));
+        super(registry, Object.assign({ signer: 'Address', signature: 'ExtrinsicSignature' }, (0, signedExtensions_1.expandExtensionTypes)(signedExtensions_1.defaultExtensions, 'extrinsic')), CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned));
     }
     /** @internal */
     static decodeExtrinsicSignature(value, isSigned = false) {
@@ -53,6 +58,9 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
     get isSigned() {
         return !this.signature.isEmpty;
     }
+    get registry() {
+        return super.registry;
+    }
     /**
      * @description The [[ExtrinsicEra]] (mortal or immortal) this signature applies to
      */
@@ -69,13 +77,7 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
      * @description The actual [[EcdsaSignature]], [[Ed25519Signature]] or [[Sr25519Signature]]
      */
     get signature() {
-        return this.multiSignature.value;
-    }
-    /**
-     * @description The raw [[MultiSignature]]
-     */
-    get multiSignature() {
-        return this.get('signature');
+        return (this.multiSignature.value || this.multiSignature);
     }
     /**
      * @description The [[Address]] that signed
@@ -104,10 +106,16 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
         return this;
     }
     /**
+    * @description The raw [[ExtrinsicSignature]]
+    */
+    get multiSignature() {
+        return this.getT('signature');
+    }
+    /**
      * @description Adds a raw signature
      */
     addSignature(signer, signature, payload) {
-        return this.injectSignature(this.registry.createType('Address', signer), this.registry.createType('MultiSignature', signature), new ExtrinsicPayload_1.default(this.registry, payload));
+        return this.injectSignature(toAddress(this.registry, signer), this.registry.createTypeUnsafe('ExtrinsicSignature', [signature]), new ExtrinsicPayload_1.default(this.registry, payload));
     }
     /**
      * @description Creates a payload from the supplied options
@@ -122,6 +130,7 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
             specVersion,
             // [[tip]] is now set inside [[transactionPayment]]
             // This doesn't do anything, just signalling our intention not to use it.
+            //@ts-ignore
             tip: null,
             transactionVersion: transactionVersion || 0,
             transactionPayment: transactionPayment,
@@ -131,19 +140,17 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
      * @description Generate a payload and applies the signature from a keypair
      */
     sign(method, account, options) {
-        const signer = this.registry.createType('Address', account.addressRaw);
+        (0, util_1.assert)(account && account.addressRaw, () => `Expected a valid keypair for signing, found ${(0, util_1.stringify)(account)}`);
         const payload = this.createPayload(method, options);
-        const signature = this.registry.createType('MultiSignature', payload.sign(account));
-        return this.injectSignature(signer, signature, payload);
+        return this.injectSignature(toAddress(this.registry, account.addressRaw), this.registry.createTypeUnsafe('ExtrinsicSignature', [payload.sign(account)]), payload);
     }
     /**
      * @description Generate a payload and applies a fake signature
      */
     signFake(method, address, options) {
-        const signer = this.registry.createType('Address', address);
+        (0, util_1.assert)(address, () => `Expected a valid address for signing, found ${(0, util_1.stringify)(address)}`);
         const payload = this.createPayload(method, options);
-        const signature = this.registry.createType('MultiSignature', (0, util_1.u8aConcat)(new Uint8Array([1]), new Uint8Array(64).fill(0x42)));
-        return this.injectSignature(signer, signature, payload);
+        return this.injectSignature(toAddress(this.registry, address), this.registry.createTypeUnsafe('ExtrinsicSignature', [FAKE_SIGNATURE]), payload);
     }
     /**
      * @description Encodes the value as a Uint8Array as per the SCALE specifications
