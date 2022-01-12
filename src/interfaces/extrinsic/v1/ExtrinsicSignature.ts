@@ -135,7 +135,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
    */
   public get tip(): Compact<Balance> {
-    return this.transactionPayment.tip as Compact<Balance>;
+    return (this.transactionPayment ? this.transactionPayment.tip : this.registry.createType('Compact<Balance>', 0)) as Compact<Balance>
   }
 
   /**
@@ -211,8 +211,8 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
       // This doesn't do anything, just signalling our intention not to use it.
       //@ts-ignore
       tip: null,
-      transactionVersion: transactionVersion || 0,
       transactionPayment,
+      transactionVersion: transactionVersion || 0,
     });
   }
 

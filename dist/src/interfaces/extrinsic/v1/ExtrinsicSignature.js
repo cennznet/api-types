@@ -102,7 +102,7 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
      * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
      */
     get tip() {
-        return this.transactionPayment.tip;
+        return (this.transactionPayment ? this.transactionPayment.tip : this.registry.createType('Compact<Balance>', 0));
     }
     /**
      * @description The transaction fee metadata e.g tip, fee exchange
@@ -151,8 +151,8 @@ class CENNZnetExtrinsicSignatureV1 extends types_1.Struct {
             // This doesn't do anything, just signalling our intention not to use it.
             //@ts-ignore
             tip: null,
-            transactionVersion: transactionVersion || 0,
             transactionPayment,
+            transactionVersion: transactionVersion || 0,
         });
     }
     /**
