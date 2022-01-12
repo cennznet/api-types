@@ -13,7 +13,8 @@ import { HexString } from '@polkadot/util/types';
  * A container for the [[Signature]] associated with a specific [[Extrinsic]]
  */
 export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExtrinsicSignature {
-    constructor(registry: CodecRegistry, value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, extSigOpt?: ExtrinsicSignatureOptions);
+    #private;
+    constructor(registry: CodecRegistry, value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, { isSigned }?: ExtrinsicSignatureOptions);
     /** @internal */
     static decodeExtrinsicSignature(value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined, isSigned?: boolean): CENNZnetExtrinsicSignatureV1 | Uint8Array;
     /**
@@ -49,7 +50,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
      * @description The transaction fee metadata e.g tip, fee exchange
      */
     get transactionPayment(): ChargeTransactionPayment;
-    protected injectSignature(signer: Address, signature: MultiSignature, { era, nonce, transactionPayment }: ExtrinsicPayloadV4): IExtrinsicSignature;
+    protected _injectSignature(signer: Address, signature: MultiSignature, payload: ExtrinsicPayloadV4): IExtrinsicSignature;
     /**
     * @description The raw [[ExtrinsicSignature]]
     */

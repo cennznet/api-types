@@ -27,7 +27,7 @@ import {
 import { Compact, Struct } from '@polkadot/types';
 import { ExtrinsicPayloadValue, IExtrinsicSignature, IKeyringPair, Registry } from '@polkadot/types/types';
 import { EMPTY_U8A, IMMORTAL_ERA } from '@polkadot/types/extrinsic/constants';
-import { assert, isU8a, stringify, u8aConcat, u8aToHex } from '@polkadot/util';
+import { assert, isU8a, isUndefined, objectProperties, objectSpread, stringify, u8aConcat, u8aToHex } from '@polkadot/util';
 
 import { ExtrinsicSignatureOptions } from '@polkadot/types/extrinsic/types';
 import { expandExtensionTypes, defaultExtensions } from '../signedExtensions';
@@ -50,21 +50,25 @@ function toAddress (registry: CodecRegistry, address: Address | Uint8Array | str
  * A container for the [[Signature]] associated with a specific [[Extrinsic]]
  */
 export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExtrinsicSignature {
+  #signKeys: string[];
+
   constructor(
     registry: CodecRegistry,
     value: CENNZnetExtrinsicSignatureV1 | Uint8Array | undefined,
-    extSigOpt: ExtrinsicSignatureOptions = {}
+    { isSigned }: ExtrinsicSignatureOptions = {}
   ) {
-    const isSigned = extSigOpt.isSigned;
     super(
       registry,
-      {
-        signer: 'Address',
-        signature: 'ExtrinsicSignature',
-        ...expandExtensionTypes(defaultExtensions as string[], 'extrinsic'),
-      },
+      objectSpread(
+        { signer: 'Address', signature: 'ExtrinsicSignature' },
+        registry.getSignedExtensionTypes(),
+      ),
       CENNZnetExtrinsicSignatureV1.decodeExtrinsicSignature(value, isSigned)
     );
+
+    this.#signKeys = Object.keys(registry.getSignedExtensionTypes());
+
+    objectProperties(this, this.#signKeys, (k) => this.get(k));
   }
 
   /** @internal */
@@ -84,14 +88,14 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
   /**
    * @description The length of the value when encoded as a Uint8Array
    */
-  get encodedLength(): number {
+  public get encodedLength(): number {
     return this.isSigned ? super.encodedLength : 0;
   }
 
   /**
    * @description `true` if the signature is valid
    */
-  get isSigned(): boolean {
+  public get isSigned(): boolean {
     return !this.signature.isEmpty;
   }
 
@@ -102,55 +106,64 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
   /**
    * @description The [[ExtrinsicEra]] (mortal or immortal) this signature applies to
    */
-  get era(): ExtrinsicEra {
+  public get era(): ExtrinsicEra {
     return this.get('era') as ExtrinsicEra;
   }
 
   /**
    * @description The [[Index]] for the signature
    */
-  get nonce(): Compact<Index> {
+  public get nonce(): Compact<Index> {
     return this.get('nonce') as Compact<Index>;
   }
 
   /**
    * @description The actual [[EcdsaSignature]], [[Ed25519Signature]] or [[Sr25519Signature]]
    */
-  get signature(): EcdsaSignature | Ed25519Signature | Sr25519Signature {
+  public get signature(): EcdsaSignature | Ed25519Signature | Sr25519Signature {
     return (this.multiSignature.value ||  this.multiSignature) as Sr25519Signature;
   }
 
   /**
    * @description The [[Address]] that signed
    */
-  get signer(): Address {
-    return this.get('signer') as Address;
+  public get signer(): Address {
+    return this.getT('signer');
   }
 
   /**
    * @description tip [[Balance]] (here for compatibility with [[IExtrinsic]] definition)
    */
-  get tip(): Compact<Balance> {
+  public get tip(): Compact<Balance> {
     return this.transactionPayment.tip as Compact<Balance>;
   }
 
   /**
    * @description The transaction fee metadata e.g tip, fee exchange
    */
-  get transactionPayment(): ChargeTransactionPayment {
+  public get transactionPayment(): ChargeTransactionPayment {
     return this.get('transactionPayment') as ChargeTransactionPayment;
   }
 
-  protected injectSignature(
+  protected _injectSignature(
     signer: Address,
     signature: MultiSignature,
-    { era, nonce, transactionPayment }: ExtrinsicPayloadV4
+    payload: ExtrinsicPayloadV4
   ): IExtrinsicSignature {
-    this.set('era', era);
-    this.set('nonce', nonce);
+
+    // use the fields exposed to guide the getters
+    for (let i = 0; i < this.#signKeys.length; i++) {
+      const k = this.#signKeys[i];
+      const v = payload.get(k);
+
+      if (!isUndefined(v)) {
+        this.set(k, v);
+      }
+    }
+
+    // additional fields (exposed in struct itself)
     this.set('signer', signer);
     this.set('signature', signature);
-    this.set('transactionPayment', transactionPayment);
 
     return this;
   }
@@ -166,7 +179,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
    * @description Adds a raw signature
    */
    public addSignature (signer: Address | Uint8Array | string, signature: Uint8Array | HexString, payload: ExtrinsicPayloadValue | Uint8Array | HexString): IExtrinsicSignature {
-    return this.injectSignature(
+    return this._injectSignature(
       toAddress(this.registry, signer),
       this.registry.createTypeUnsafe('ExtrinsicSignature', [signature]),
       new ExtrinsicPayloadV4(this.registry, payload)
@@ -199,7 +212,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
       //@ts-ignore
       tip: null,
       transactionVersion: transactionVersion || 0,
-      transactionPayment: transactionPayment,
+      transactionPayment,
     });
   }
 
@@ -210,8 +223,9 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
     assert(account && account.addressRaw, () => `Expected a valid keypair for signing, found ${stringify(account)}`);
 
     const payload = this.createPayload(method, options);
+    console.log(payload);
 
-    return this.injectSignature(
+    return this._injectSignature(
       toAddress(this.registry, account.addressRaw),
       this.registry.createTypeUnsafe('ExtrinsicSignature', [payload.sign(account)]),
       payload
@@ -226,7 +240,7 @@ export default class CENNZnetExtrinsicSignatureV1 extends Struct implements IExt
 
     const payload = this.createPayload(method, options);
 
-    return this.injectSignature(
+    return this._injectSignature(
       toAddress(this.registry, address),
       this.registry.createTypeUnsafe('ExtrinsicSignature', [FAKE_SIGNATURE]),
       payload

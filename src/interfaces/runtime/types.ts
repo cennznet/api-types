@@ -6,6 +6,7 @@ import type { Bytes, Compact, DoNotConstruct, Enum, Int, Null, Option, Struct, U
 import type { ITuple } from '@polkadot/types-codec/types';
 import type { AuthorityId } from '@polkadot/types/interfaces/consensus';
 import type { Signature } from '@polkadot/types/interfaces/extrinsics';
+import type { SystemOrigin } from '@polkadot/types/interfaces/system';
 
 /** @name AccountId */
 export interface AccountId extends AccountId32 {}
